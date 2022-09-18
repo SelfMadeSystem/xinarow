@@ -33,19 +33,7 @@ export default function socket(server?: any) {
             if (rooms.has(roomName)) {
                 rooms.get(roomName)?.open(socket, packet);
             } else {
-                const room = new ServerRoom(roomName);
-                rooms.set(roomName, room);
-                room.open(socket, packet);
-
-                const timeout = setTimeout(() => {
-                    if (!room.started) room.start();
-                }, 60 * 1000);
-
-                room.closeCb = () => {
-                    clearTimeout(timeout);
-                    rooms.delete(roomName);
-                    console.log("Game Ended: ", roomName)
-                }
+                emitPacket(socket, "joinReject", "Game not found.");
             }
         });
 
