@@ -175,6 +175,8 @@ canvas.addEventListener('touchstart', (event) => {
 
     const time = Date.now();
 
+    let tap = true;
+
     const touchPos: Vec2 = [event.touches[0].clientX, event.touches[0].clientY];
     const oldPos = pos;
     const mapPos = fromDrawPoint(touchPos[0], touchPos[1]);
@@ -186,6 +188,8 @@ canvas.addEventListener('touchstart', (event) => {
         [touchPos[0], touchPos[1]] = getCenter(event.touches);
         [oldPos[0], oldPos[1]] = pos;
         [mapPos[0], mapPos[1]] = fromDrawPoint(touchPos[0], touchPos[1]);
+
+        tap = false;
     }
 
     let prevDist: number | null = null;
@@ -194,8 +198,22 @@ canvas.addEventListener('touchstart', (event) => {
         event.preventDefault();
         event.stopPropagation();
 
-        if (time + tapMaxTime > Date.now()) {
-            return;
+        if (!tap) {
+        } else if (Date.now() > time + tapMaxTime) {
+            tap = false;
+        } else if (event.touches.length > 1) {
+            tap = false;
+        } else {
+            const [x, y] = getCenter(event.touches);
+            const diffX = x - touchPos[0];
+            const diffY = y - touchPos[1];
+
+            if (Math.abs(diffX) > tapMaxDistance ||
+                Math.abs(diffY) > tapMaxDistance) {
+                tap = false;
+            } else {
+                return;
+            }
         }
 
         if (event.touches.length > 1) {
@@ -245,7 +263,7 @@ canvas.addEventListener('touchstart', (event) => {
             canvas.removeEventListener('touchmove', move);
             canvas.removeEventListener('touchend', up);
 
-            if (time + tapMaxTime > Date.now()) { // TODO: implement
+            if (tap) {
                 tapObservers.forEach(cb => cb(touchPos));
             }
         } else {
