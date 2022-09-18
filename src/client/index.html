@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite + TS</title>
+</head>
+
+<body>
+  <div id="app">
+    <canvas id="canvas"></canvas>
+    <div id="overlay">
+      <div id="loading"></div>
+      <div id="turn">Game starting...</div>
+      <div id="join-game">
+        <h1>Join game</h1>
+        <label>
+          Room name:
+          <input type="text" id="join-name" value="" />
+        </label>
+        <button id="join-button">Join</button>
+    </div>
+    <div id="create-game">
+      <h1>Create game</h1>
+      <label>
+        Room name:
+        <input type="text" id="create-name" value="" />
+      </label>
+      <br/>
+      <label>
+        Infinite size:
+        <input type="checkbox" id="create-infinite" />
+      </label>
+      <br/>
+      <label>
+        N In A Row:
+        <input type="number" id="create-n-in-a-row" value="5" min="1" step="1" />
+      </label>
+      <br/>
+      <label>
+        Player Count:
+        <input type="number" id="create-player-count" value="2" min="1" max="8" step="1" />
+      </label>
+      <br/>
+      <label>
+        Width:
+        <input type="number" id="create-width" value="12" min="1" step="1" />
+      </label>
+      <br/>
+      <label>
+        Height:
+        <input type="number" id="create-height" value="12" min="1" step="1" />
+      </label>
+      <button id="create-button">Create</button>
+  </div>
+    </div>
+  </div>
+  <script type="module" src="/main.ts"></script>
+</body>
+
+</html>
