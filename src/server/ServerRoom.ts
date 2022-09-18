@@ -19,7 +19,8 @@ export class ServerRoom {
 
     constructor(
         public readonly roomName: string,
-        public readonly playerCount = 1, // max is 8
+        public readonly teamCount = 1, // max is 8
+        public readonly teamSize = 1,
         nInARow: number = 5,
         width: number | undefined = undefined,
         height: number | undefined = undefined,
@@ -32,8 +33,8 @@ export class ServerRoom {
         this.sockets.forEach(s => emitPacket(s, name, ...packet));
     }
 
-    private emitAction(i: number, x: number, y: number) {
-        this.emit("actionTaken", x, y, i);
+    private emitAction(color: number, x: number, y: number) {
+        this.emit("actionTaken", x, y, color, this.turn);
     }
 
     private doAction(socket: SocketRef, i: number, x: number, y: number) {
@@ -45,15 +46,19 @@ export class ServerRoom {
             denyAction(socket, "It's not your turn.");
             return;
         }
-        const result = this.board.setCell(x, y, i);
+        const color = Math.floor(i / this.teamSize);
+        const result = this.board.setCell(x, y, color);
         if (result) {
             denyAction(socket, result);
             return;
         }
-        this.emitAction(i, x, y);
 
-        if (this.board.testWin(x, y, i)) {
-            this.win(i);
+        this.turn = (this.turn + 1) % (this.teamSize * this.teamCount);
+
+        this.emitAction(color, x, y);
+
+        if (this.board.testWin(x, y, color)) {
+            this.win(color);
             return;
         }
 
@@ -61,8 +66,6 @@ export class ServerRoom {
             this.end("Board full.");
             return;
         }
-
-        this.turn = (this.turn + 1) % this.playerNames.length;
     }
 
     public open(socket: SocketRef, packet: ClientPackets["join"]) {
@@ -71,7 +74,7 @@ export class ServerRoom {
             return;
         }
         const i = this.sockets.length;
-        if (i > this.playerCount) {
+        if (i >= this.teamCount * this.teamSize) {
             emitPacket(socket, "joinReject", "Game full.");
             return;
         }
@@ -82,9 +85,13 @@ export class ServerRoom {
             this.listeners.set(socket, l);
             onPacket(socket, 'action', l);
             if (this.board.width === undefined || this.board.height === undefined) {
-                emitPacket(socket, "joinAccept", i, this.board.nInARow, true);
+                emitPacket(socket, "joinAccept", i, this.board.nInARow,
+                    this.teamCount, this.teamSize,
+                    true);
             } else {
-                emitPacket(socket, "joinAccept", i, this.board.nInARow, false, this.board.width, this.board.height);
+                emitPacket(socket, "joinAccept", i, this.board.nInARow,
+                    this.teamCount, this.teamSize,
+                    false, this.board.width, this.board.height);
             }
             this.playerNames.push(packet[1]);
             this.sockets.push(socket);
@@ -98,11 +105,9 @@ export class ServerRoom {
                 });
             });
 
-            // TODO: on('disconnect', ...)
-
             this.emit("players", this.playerNames);
 
-            if (this.sockets.length === this.playerCount) {
+            if (this.sockets.length === this.teamCount * this.teamSize) {
                 this.start();
             }
         } catch (e) {

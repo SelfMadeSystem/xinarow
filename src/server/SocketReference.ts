@@ -44,7 +44,7 @@ export class SocketRef {
         }
     }
 
-    public callIfNotReplaced(cb: () => void, timeout: number = /* 20 */ 2 * 1000) {
+    public callIfNotReplaced(cb: () => void, timeout: number = 5 * 1000) {
         const socket = this.socket;
         setTimeout(() => {
             if (this.socket === socket) {

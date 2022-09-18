@@ -1,6 +1,19 @@
 import { PlayerColor } from "./PlayerColor";
 import { jsonClone } from "./Utils";
 
+export type RoomOptions = [
+    nInARow: number,
+    teamCount: PlayerColor,
+    teamSize: number, // 1 for most games
+    ...size: [
+        infinite: true
+    ] | [
+        infinite: false,
+        width: number,
+        height: number,
+    ]
+]
+
 /**
  * Defines the packets for the client to server communication.
  */
@@ -19,19 +32,8 @@ export type ClientPackets = {
     create: [
         uid: string,
         username: string,
-        room: string,
-        nInARow: number,
-        playerCount: number,
-        infinite: true,
-    ] | [
-        uid: string,
-        username: string,
-        room: string,
-        nInARow: number,
-        playerCount: number,
-        infinite: false,
-        width: number,
-        height: number,
+        roomName: string,
+        ...options: RoomOptions
     ]
     action: [x: number, y: number];
 }
@@ -41,16 +43,9 @@ export type ServerPackets = {
     pong: [timestamp: number];
     // Accepts a join request. Tells the client what color they are.
     joinAccept: [
-        color: PlayerColor,
-        nInARow: number,
-        infinite: true,
-    ] | [
-        color: PlayerColor,
-        nInARow: number,
-        infinite: false,
-        width: number,
-        height: number,
-    ];
+        player: number,
+        ...options: RoomOptions,
+    ]
     // Rejects a join request. Tells the client why.
     joinReject: [
         reason: string,
@@ -70,6 +65,7 @@ export type ServerPackets = {
         x: number,
         y: number,
         color: PlayerColor,
+        playerTurn: number, // indicating who's turn it is next
     ];
     // Tells the client the game is over because someone won.
     gameWon: [

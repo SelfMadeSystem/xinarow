@@ -2,7 +2,7 @@ import './style.scss'
 
 import { ClientRoom } from './ClientRoom';
 import { create, join } from './GameHandler';
-import { colorName, PlayerColor } from '../share/PlayerColor';
+import { colorName } from '../share/PlayerColor';
 import { capitalizeFirst } from '../share/Utils';
 
 const loadingOverlay = document.getElementById('loading')! as HTMLDivElement;
@@ -11,11 +11,15 @@ const createGameOverlay = document.getElementById('create-game')! as HTMLDivElem
 
 const statusOverlay = document.getElementById('turn')! as HTMLDivElement
 
-export function setTurnText(turn: PlayerColor, color: PlayerColor) {
-    if (turn === color) {
+export function setTurnText(turn: number, myTurn: number, teamSize: number) {
+    if (turn === myTurn) {
         setStatusText("It's your turn.");
     } else {
-        setStatusText(`${capitalizeFirst(colorName(turn))}'s turn.`);
+        if (teamSize === 1) {
+            setStatusText(`${capitalizeFirst(colorName(turn))}'s turn.`);
+        } else {
+            setStatusText(`${capitalizeFirst(colorName(Math.floor(turn / teamSize)))} #${turn % teamSize + 1}'s turn.`);
+        }
     }
 }
 
@@ -46,14 +50,9 @@ joinButton.addEventListener('click', async () => {
     }
     statusOverlay.style.visibility = 'visible'
     console.log('Game started')
-    const color = result[0];
-    const nInARow = result[1];
-    const infinite = result[2];
-    const width = infinite ? undefined : result[3];
-    const height = infinite ? undefined : result[4];
-    console.log(result, infinite, width, height);
+    const [player, nInARow, teamCount, teamSize, _, width, height] = result;
 
-    const room = new ClientRoom(roomName, color, nInARow, width, height)
+    const room = new ClientRoom(roomName, player, teamCount, teamSize, nInARow, width, height)
 
     room.closeCb = () => {
         joinGameOverlay.style.display = '';
@@ -67,7 +66,8 @@ const createButton = document.getElementById('create-button')! as HTMLButtonElem
 const createName = document.getElementById('create-name')! as HTMLInputElement
 const createInfinite = document.getElementById('create-infinite')! as HTMLInputElement
 const createNInARow = document.getElementById('create-n-in-a-row')! as HTMLInputElement
-const createPlayerCount = document.getElementById('create-player-count')! as HTMLInputElement
+const createTeamCount = document.getElementById('create-team-count')! as HTMLInputElement
+const createTeamSize = document.getElementById('create-team-size')! as HTMLInputElement
 const createWidth = document.getElementById('create-width')! as HTMLInputElement
 const createHeight = document.getElementById('create-height')! as HTMLInputElement
 
@@ -75,7 +75,8 @@ createButton.addEventListener('click', async () => {
     const roomName = createName.value as string;
     const infinite = createInfinite.checked;
     const nInARow = parseInt(createNInARow.value);
-    const playerCount = parseInt(createPlayerCount.value);
+    const teamCount = parseInt(createTeamCount.value);
+    const teamSize = parseInt(createTeamSize.value);
     const width = parseInt(createWidth.value);
     const height = parseInt(createHeight.value);
 
@@ -83,7 +84,8 @@ createButton.addEventListener('click', async () => {
     createGameOverlay.style.display = 'none'
     loadingOverlay.style.visibility = 'visible'
 
-    const result = await (infinite ? create(roomName, nInARow, playerCount, true) : create(roomName, nInARow, playerCount, false, width, height));
+    const result = await (infinite ? create(roomName, nInARow, teamCount, teamSize, true) :
+        create(roomName, nInARow, teamCount, teamSize, false, width, height));
 
     loadingOverlay.style.visibility = '';
 
@@ -96,9 +98,9 @@ createButton.addEventListener('click', async () => {
     }
     statusOverlay.style.visibility = 'visible'
     console.log('Game started')
-    const color = result[0];
+    const player = result[0];
 
-    const room = new ClientRoom(roomName, color, nInARow, infinite ? undefined : width, infinite ? undefined : height)
+    const room = new ClientRoom(roomName, player, teamCount, teamSize, nInARow, infinite ? undefined : width, infinite ? undefined : height)
 
     room.closeCb = () => {
         joinGameOverlay.style.display = '';

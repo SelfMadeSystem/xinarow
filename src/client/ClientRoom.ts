@@ -7,7 +7,7 @@ import { socket } from './socket';
 import { Vec2 } from '../share/Utils';
 import { setStatusText, setTurnText } from "./main";
 
-export class ClientRoom {
+export class ClientRoom { // TODO: Make a base class and have an online and offline implementation
     public playerNames: string[] = [];
     public readonly board: Board;
     public winningLines: Vec2[][] = [];
@@ -17,14 +17,16 @@ export class ClientRoom {
 
     constructor(
         public readonly roomName: string,
-        public readonly color: PlayerColor,
+        public readonly myTurn: number,
+        public readonly teamCount: PlayerColor,
+        public readonly teamSize: number,
         nInARow: number = 5,
         width: number | undefined = undefined,
         height: number | undefined = undefined,
     ) {
         this.board = new Board(nInARow, width, height);
 
-        let fActionTaken: (x: number, y: number, p: PlayerColor) => void;
+        let fActionTaken: (x: number, y: number, p: PlayerColor, playerTurn: number) => void;
         let fPlayers: (users: string[]) => void;
         let fGameWon: (p: PlayerColor, l: Vec2[][]) => void;
         let fGameEnd: (s: string) => void;
@@ -48,7 +50,7 @@ export class ClientRoom {
 
         onPacket(socket, 'gameStarted', fGameStarted = () => {
             console.log("Started!");
-            setTurnText(this.turn, this.color);
+            setTurnText(this.turn, this.myTurn, this.teamSize);
         })
 
         requestAnimationFrame(this.draw.bind(this));
@@ -83,12 +85,12 @@ export class ClientRoom {
         setStatusText(`Game starting...`);
     }
 
-    actionTaken(x: number, y: number, color: PlayerColor) {
-        this.turn = (color + 1) % this.playerNames.length;
+    actionTaken(x: number, y: number, color: PlayerColor, turn: number) {
+        this.turn = turn;
 
         this.board.setCell(x, y, color);
 
-        setTurnText(this.turn, this.color);
+        setTurnText(this.turn, this.myTurn, this.teamSize);
 
         this.draw();
     }

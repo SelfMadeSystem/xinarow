@@ -1,4 +1,4 @@
-import { ServerPackets } from '../share/Protocol';
+import { RoomOptions, ServerPackets } from '../share/Protocol';
 import { awaitFor, awaitForAny, emit, uid } from './socket';
 
 let username = `user-${uid.substring(0, 8)}`;
@@ -16,16 +16,7 @@ export async function join(room: string) {
 
 export async function create(...args: [
     room: string,
-    nInARow: number,
-    playerCount: number,
-    infinite: true,
-] | [
-    room: string,
-    nInARow: number,
-    playerCount: number,
-    infinite: false,
-    width: number,
-    height: number,
+    ...options: RoomOptions
 ]) {
     emit("create", uid, username, ...args);
 

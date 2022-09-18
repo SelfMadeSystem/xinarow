@@ -1,4 +1,5 @@
 import { Server } from 'socket.io';
+import { PlayerColor } from '../share/PlayerColor';
 import { emitPacket, onPacket } from '../share/Protocol';
 import { ServerRoom } from './ServerRoom';
 import { SocketReferences } from './SocketReference';
@@ -48,28 +49,35 @@ export default function socket(server?: any) {
             }
         });
 
-        onPacket(socket, 'create', (...packet) => {
-            const roomName = packet[2];
+        onPacket(socket, 'create', (uid: string,
+            username: string,
+            roomName: string,
+            nInARow: number,
+            teamCount: PlayerColor,
+            teamSize: number, // 1 for most games
+            ...size: [
+                infinite: true
+            ] | [
+                infinite: false,
+                width: number,
+                height: number,
+            ]) => {
 
             if (rooms.has(roomName)) {
                 emitPacket(socket, "joinReject", "Room already exists.");
                 return
             }
 
-            const nInARow = packet[3];
-            const playerCount = packet[4];
-            const infinite = packet[5];
-
             const room = (() => {
-                if (infinite) {
-                    return new ServerRoom(roomName, playerCount, nInARow);
+                if (size[0] === true) {
+                    return new ServerRoom(roomName, teamCount, teamSize, nInARow);
                 }
-                const width = packet[6];
-                const height = packet[7];
-                return new ServerRoom(roomName, playerCount, nInARow, width, height)
+                const width = size[1];
+                const height = size[2];
+                return new ServerRoom(roomName, teamCount, teamSize, nInARow, width, height)
             })();
             rooms.set(roomName, room);
-            room.open(socket, [packet[0], packet[1], packet[2]]);
+            room.open(socket, [uid, username, roomName]);
 
             // const timeout = setTimeout(() => {
             //     if (!room.started) room.start();

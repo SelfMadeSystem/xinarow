@@ -14,6 +14,7 @@ export let height: number = canvas.height;
 new ResizeObserver(() => {
     width = canvas.width = canvas.clientWidth;
     height = canvas.height = canvas.clientHeight;
+    refresh();
 }).observe(canvas);
 
 const tapMaxTime = 150;
