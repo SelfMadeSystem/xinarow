@@ -81,6 +81,9 @@ export class ClientRoom { // TODO: Make a base class and have an online and offl
 
         CanvasManager.onCanvasTap(onTap);
         CanvasManager.onCanvasRefresh(this.draw.bind(this));
+        if (this.board.width !== undefined && this.board.height !== undefined) {
+            CanvasManager.setZoomFactorForSize(this.board.width, this.board.height);
+        }
 
         setStatusText(`Game starting...`);
     }

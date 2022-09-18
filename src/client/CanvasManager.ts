@@ -58,8 +58,8 @@ export function refresh() {
 let pos: Vec2 = [0, 0];
 let zoom = 50;
 
-const minZoom = zoom * (2 ** -4);
-const maxZoom = zoom * (2 ** 4);
+const minZoom = zoom * (2 ** -2);
+const maxZoom = zoom * (2 ** 2);
 
 canvas.addEventListener('wheel', (event) => {
     event.preventDefault();
@@ -356,4 +356,8 @@ export function drawWinningLines(winningLines: Vec2[][]) {
     for (const line of winningLines) {
         drawLine(line[0][0] + 0.5, line[0][1] + 0.5, line[1][0] + 0.5, line[1][1] + 0.5);
     }
+}
+
+export function setZoomFactorForSize(w: number, h: number) {
+    zoom = clamp(Math.min(width / w, height / h), minZoom, maxZoom);
 }
