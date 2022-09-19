@@ -2,8 +2,7 @@ import { defineConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
 import socket from './src/server/socket'
 
-const port = 3000
-const socketPort = port + 1
+const port = Math.floor(Math.random() * 1000) + 3000
 
 export default defineConfig({
     // plugins: [mkcert()],
@@ -11,11 +10,11 @@ export default defineConfig({
     base: '',
     
     server: {
-        port: port,
+        port: 3000,
         https: false,
         proxy: {
             '/socket.io': {
-                target: `ws://localhost:${socketPort}`,
+                target: `ws://localhost:${port}`,
                 changeOrigin: true,
                 ws: true,
             },
@@ -41,4 +40,4 @@ export default defineConfig({
     appType: 'spa',
 })
 
-socket(socketPort)
+socket(port)
