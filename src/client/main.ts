@@ -1,6 +1,6 @@
 import './style.scss'
 
-import { ClientRoom } from './ClientRoom';
+import { OnlineClientRoom } from './OnlineClientRoom';
 import { create, join } from './GameHandler';
 import { colorName } from '../share/PlayerColor';
 import { capitalizeFirst } from '../share/Utils';
@@ -52,7 +52,7 @@ joinButton.addEventListener('click', async () => {
     console.log('Game started')
     const [player, nInARow, teamCount, teamSize, _, width, height] = result;
 
-    const room = new ClientRoom(roomName, player, teamCount, teamSize, nInARow, width, height)
+    const room = new OnlineClientRoom(roomName, player, teamCount, teamSize, nInARow, width, height)
 
     room.closeCb = () => {
         joinGameOverlay.style.display = '';
@@ -100,7 +100,7 @@ createButton.addEventListener('click', async () => {
     console.log('Game started')
     const player = result[0];
 
-    const room = new ClientRoom(roomName, player, teamCount, teamSize, nInARow, infinite ? undefined : width, infinite ? undefined : height)
+    const room = new OnlineClientRoom(roomName, player, teamCount, teamSize, nInARow, infinite ? undefined : width, infinite ? undefined : height)
 
     room.closeCb = () => {
         joinGameOverlay.style.display = '';
