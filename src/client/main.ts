@@ -4,6 +4,7 @@ import { OnlineClientRoom } from './OnlineClientRoom';
 import { create, join } from './GameHandler';
 import { colorName } from '../share/PlayerColor';
 import { capitalizeFirst } from '../share/Utils';
+import { OfflineClientRoom } from './OfflineClientRoom';
 
 const loadingOverlay = document.getElementById('loading')! as HTMLDivElement;
 const joinGameOverlay = document.getElementById('join-game')! as HTMLDivElement
@@ -75,6 +76,7 @@ const createTeamCount = document.getElementById('create-team-count')! as HTMLInp
 const createTeamSize = document.getElementById('create-team-size')! as HTMLInputElement
 const createWidth = document.getElementById('create-width')! as HTMLInputElement
 const createHeight = document.getElementById('create-height')! as HTMLInputElement
+const createOnline = document.getElementById('create-online')! as HTMLInputElement
 
 createButton.addEventListener('click', async () => {
     const roomName = createName.value as string;
@@ -85,13 +87,14 @@ createButton.addEventListener('click', async () => {
     const teamSize = parseInt(createTeamSize.value);
     const width = parseInt(createWidth.value);
     const height = parseInt(createHeight.value);
+    const online = createOnline.checked;
 
     joinGameOverlay.style.display = 'none'
     createGameOverlay.style.display = 'none'
     loadingOverlay.style.visibility = 'visible'
 
-    const result = await (infinite ? create(roomName, { nInARow, teamCount, teamSize, gravity, infinite }) :
-        create(roomName, { nInARow, teamCount, teamSize, gravity, infinite, width, height}));
+    const result = online ? await (infinite ? create(roomName, { nInARow, teamCount, teamSize, gravity, infinite }) :
+        create(roomName, { nInARow, teamCount, teamSize, gravity, infinite, width, height})) : [0];
 
     loadingOverlay.style.visibility = '';
 
@@ -106,7 +109,7 @@ createButton.addEventListener('click', async () => {
     console.log('Game started')
     const player = result[0];
 
-    const room = new OnlineClientRoom(roomName, player, teamCount, teamSize, nInARow, gravity, infinite ? undefined : width, infinite ? undefined : height)
+    const room = new (online ? OnlineClientRoom : OfflineClientRoom)(roomName, player, teamCount, teamSize, nInARow, gravity, infinite ? undefined : width, infinite ? undefined : height)
 
     room.closeCb = () => {
         joinGameOverlay.style.display = '';

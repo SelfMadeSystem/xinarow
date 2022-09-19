@@ -11,7 +11,8 @@ export abstract class BaseClientRoom {
     public turn: number = 0;
     public ended: boolean = false;
     public closeCb: () => void = () => { };
-    protected readonly onTap: ([x, y]: Vec2) => void;
+    private onTapBinding: (v: Vec2) => void;
+    private onRefreshBinding: (v: Vec2) => void;
 
     constructor(
         public readonly roomName: string,
@@ -27,26 +28,23 @@ export abstract class BaseClientRoom {
 
         requestAnimationFrame(this.draw.bind(this));
 
-        this.onTap = ([x, y]: Vec2) => {
-            if (this.turn !== this.myTurn) {
-                return;
-            }
-            const point = CanvasManager.fromDrawPoint(x, y);
-            point[0] = Math.floor(point[0]);
-            point[1] = Math.floor(point[1]);
-            if (!this.board.withinBounds(point[0], point[1])) {
-                return;
-            }
-            this.setCell(...point);
-        }
-
-        CanvasManager.onCanvasTap(this.onTap);
-        CanvasManager.onCanvasRefresh(this.draw.bind(this));
+        CanvasManager.onCanvasTap(this.onTapBinding = this.onTap.bind(this));
+        CanvasManager.onCanvasRefresh(this.onRefreshBinding = this.draw.bind(this));
         if (this.board.width !== undefined && this.board.height !== undefined) {
             CanvasManager.setZoomFactorForSize(this.board.width, this.board.height);
         }
 
         setStatusText(`Game starting...`);
+    }
+
+    onTap([x, y]: Vec2) {
+        const point = CanvasManager.fromDrawPoint(x, y);
+        point[0] = Math.floor(point[0]);
+        point[1] = Math.floor(point[1]);
+        if (!this.board.withinBounds(point[0], point[1])) {
+            return;
+        }
+        this.setCell(...point);
     }
 
     actionTaken(x: number, y: number, color: PlayerColor, turn: number) {
@@ -71,6 +69,16 @@ export abstract class BaseClientRoom {
         CanvasManager.drawGrid(this.board.width, this.board.height);
         CanvasManager.drawBoard(this.board);
         CanvasManager.drawWinningLines(this.winningLines);
+    }
+
+    end(reason?: string) {
+        this.ended = true;
+        CanvasManager.offCanvasTap(this.onTapBinding);
+        CanvasManager.offCanvasRefresh(this.onRefreshBinding);
+        if (reason) {
+            alert(reason);
+        }
+        this.closeCb();
     }
 
     abstract setCell(x: number, y: number): Promise<string | boolean>;

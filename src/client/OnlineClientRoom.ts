@@ -1,7 +1,6 @@
 import { PlayerColor } from "../share/PlayerColor";
 import { onPacket, offPacket } from "../share/Protocol";
 import { action } from "./GameHandler";
-import * as CanvasManager from "./CanvasManager";
 import { socket } from './socket';
 import { Vec2 } from '../share/Utils';
 import { setTurnText } from "./main";
@@ -33,13 +32,12 @@ export class OnlineClientRoom extends BaseClientRoom {
         onPacket(socket, 'gameWon', fGameWon = (winner, lines) => {
             console.log('Won!', winner, lines);
             this.winningLines = lines;
-            end();
+            this.end();
         })
 
         onPacket(socket, 'gameEnd', fGameEnd = (reason) => {
             console.log("Ended...", reason);
-            end();
-            alert(reason);
+            this.end(reason);
         })
 
         onPacket(socket, 'gameStarted', fGameStarted = () => {
@@ -47,11 +45,8 @@ export class OnlineClientRoom extends BaseClientRoom {
             setTurnText(this.turn, this.myTurn, this.teamSize);
         })
 
-        const end = () => {
-            this.draw();
-            this.ended = true;
-            this.closeCb();
-            CanvasManager.offCanvasTap(this.onTap);
+        this.end = (reason?: string) => {
+            super.end(reason);
 
             offPacket(socket, 'actionTaken', fActionTaken);
 
@@ -66,6 +61,9 @@ export class OnlineClientRoom extends BaseClientRoom {
     }
 
     override setCell(x: number, y: number) {
+        if (this.turn !== this.myTurn) {
+            return new Promise<string>((r) => r("It's not your turn!"));
+        }
         return action(x, y);
     }
 }
