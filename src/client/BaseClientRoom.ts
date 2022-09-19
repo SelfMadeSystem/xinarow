@@ -27,9 +27,15 @@ export abstract class BaseClientRoom {
         requestAnimationFrame(this.draw.bind(this));
 
         this.onTap = ([x, y]: Vec2) => {
+            if (this.turn !== this.myTurn) {
+                return;
+            }
             const point = CanvasManager.fromDrawPoint(x, y);
             point[0] = Math.floor(point[0]);
             point[1] = Math.floor(point[1]);
+            if (this.board.hasCell(point[0], point[1])) {
+                return;
+            }
             this.setCell(...point);
         }
 
