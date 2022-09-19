@@ -8,6 +8,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
 
     constructor(
         public readonly nInARow: number = 5,
+        public readonly gravity: boolean = false,
         public readonly width: number | undefined = undefined,
         public readonly height: number | undefined = undefined,
     ) {
@@ -26,6 +27,28 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             return n;
         }
         return fromNaturalNumber(n);
+    }
+
+    private getGravityY(x: number): number {
+        if (this.width === undefined || this.height === undefined) {
+            return NaN;
+        }
+        for (let i = this.height - 1; i >= 0; i--) {
+            if (!this.hasCell(x, i)) {
+                return i;
+            }
+        }
+        return Infinity;
+    }
+
+    public withinBounds(x: number, y: number): boolean {
+        if (this.width !== undefined && (x < 0 || x >= this.width)) {
+            return false;
+        }
+        if (this.height !== undefined && (y < 0 || y >= this.height)) {
+            return false;
+        }
+        return true;
     }
 
     private _setCell(x: number, y: number, color: PlayerColor): void {
@@ -49,14 +72,22 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         if (color < 0 || color > PlayerColor.Pink) {
             return `Color must be between 0 and ${PlayerColor.Pink}`;
         }
+        if (!this.withinBounds(x, y)) {
+            return "Cell out of bounds.";
+        }
+        if (this.gravity) {
+            y = this.getGravityY(x);
+
+            if (y === Infinity) {
+                return "Cell out of bounds.";
+            }
+
+            if (isNaN(y)) { // For fun, pretend that it passes, but don't actually do anything.
+                return;
+            }
+        }
         if (this.hasCell(x, y)) {
             return "Cell already set";
-        }
-        if (this.width !== undefined && (x < 0 || x >= this.width)) {
-            return "Cell out of bounds.";
-        }
-        if (this.height !== undefined && (y < 0 || y >= this.height)) {
-            return "Cell out of bounds.";
         }
         this._setCell(x, y, color);
         this.lastSetCell = [x, y];
@@ -96,6 +127,20 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
     }
 
     public testWin(x: number, y: number, color: PlayerColor): boolean {
+        if (this.gravity) {
+            y = this.getGravityY(x) + 1;
+
+            console.log("Gravity Y:", y);
+            console.log(this.getCell(x, y));
+
+            if (y === Infinity) {
+                y = 0;
+            }
+
+            if (isNaN(y)) { // For fun, pretend that it passes, but don't actually do anything.
+                return false;
+            }
+        }
         // We want to test all directions and not just the first one that returns true
         let result1 = this.testWinHorizontal(x, y, color);
         let result2 = this.testWinVertical(x, y, color);

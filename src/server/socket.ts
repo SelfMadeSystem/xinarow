@@ -1,6 +1,5 @@
 import { Server } from 'socket.io';
-import { PlayerColor } from '../share/PlayerColor';
-import { emitPacket, onPacket } from '../share/Protocol';
+import { emitPacket, onPacket, RoomOptions } from '../share/Protocol';
 import { ServerRoom } from './ServerRoom';
 import { SocketReferences } from './SocketReference';
 
@@ -37,32 +36,25 @@ export default function socket(server?: any) {
             }
         });
 
-        onPacket(socket, 'create', (uid: string,
+        onPacket(socket, 'create', (
+            uid: string,
             username: string,
             roomName: string,
-            nInARow: number,
-            teamCount: PlayerColor,
-            teamSize: number, // 1 for most games
-            ...size: [
-                infinite: true
-            ] | [
-                infinite: false,
-                width: number,
-                height: number,
-            ]) => {
+            options: RoomOptions) => {
 
             if (rooms.has(roomName)) {
                 emitPacket(socket, "joinReject", "Room already exists.");
                 return
             }
 
+            const { nInARow, teamCount, teamSize, gravity, infinite } = options;
+
             const room = (() => {
-                if (size[0] === true) {
-                    return new ServerRoom(roomName, teamCount, teamSize, nInARow);
+                if (infinite) {
+                    return new ServerRoom(roomName, teamCount, teamSize, nInARow, gravity);
                 }
-                const width = size[1];
-                const height = size[2];
-                return new ServerRoom(roomName, teamCount, teamSize, nInARow, width, height)
+                const { width, height } = options;
+                return new ServerRoom(roomName, teamCount, teamSize, nInARow, gravity, width, height)
             })();
             rooms.set(roomName, room);
             room.open(socket, [uid, username, roomName]);

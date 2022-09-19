@@ -1,18 +1,18 @@
 import { PlayerColor } from "./PlayerColor";
 import { jsonClone } from "./Utils";
 
-export type RoomOptions = [
+export type RoomOptions = {
     nInARow: number,
     teamCount: PlayerColor,
     teamSize: number, // 1 for most games
-    ...size: [
-        infinite: true
-    ] | [
-        infinite: false,
-        width: number,
-        height: number,
-    ]
-]
+    gravity: boolean,
+} & ({
+    infinite: true
+} | {
+    infinite: false,
+    width: number,
+    height: number,
+})
 
 /**
  * Defines the packets for the client to server communication.
@@ -33,7 +33,7 @@ export type ClientPackets = {
         uid: string,
         username: string,
         roomName: string,
-        ...options: RoomOptions
+        options: RoomOptions
     ]
     action: [x: number, y: number];
 }
@@ -44,7 +44,7 @@ export type ServerPackets = {
     // Accepts a join request. Tells the client what color they are.
     joinAccept: [
         player: number,
-        ...options: RoomOptions,
+        options: RoomOptions,
     ]
     // Rejects a join request. Tells the client why.
     joinReject: [

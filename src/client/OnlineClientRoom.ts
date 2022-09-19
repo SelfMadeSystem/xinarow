@@ -13,11 +13,12 @@ export class OnlineClientRoom extends BaseClientRoom {
         myTurn: number,
         teamCount: PlayerColor,
         teamSize: number,
-        nInARow: number = 5,
-        width: number | undefined = undefined,
-        height: number | undefined = undefined,
+        nInARow: number,
+        gravity: boolean,
+        width: number | undefined,
+        height: number | undefined,
     ) {
-        super(roomName, myTurn, teamCount, teamSize, nInARow, width, height);
+        super(roomName, myTurn, teamCount, teamSize, nInARow, gravity, width, height);
 
         let fActionTaken: (x: number, y: number, p: PlayerColor, playerTurn: number) => void;
         let fPlayers: (users: string[]) => void;

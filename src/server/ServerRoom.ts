@@ -22,10 +22,11 @@ export class ServerRoom {
         public readonly teamCount = 1, // max is 8
         public readonly teamSize = 1,
         nInARow: number = 5,
+        gravity: boolean = false,
         width: number | undefined = undefined,
         height: number | undefined = undefined,
     ) {
-        this.board = new Board(nInARow, width, height);
+        this.board = new Board(nInARow, gravity, width, height);
     }
 
     private emit<Name extends ServerPacketNames>(name: Name,
@@ -85,13 +86,21 @@ export class ServerRoom {
             this.listeners.set(socket, l);
             onPacket(socket, 'action', l);
             if (this.board.width === undefined || this.board.height === undefined) {
-                emitPacket(socket, "joinAccept", i, this.board.nInARow,
-                    this.teamCount, this.teamSize,
-                    true);
+                emitPacket(socket, "joinAccept", i, {
+                    nInARow: this.board.nInARow,
+                    teamCount: this.teamCount,
+                    teamSize: this.teamSize,
+                    gravity: this.board.gravity,
+                    infinite: true});
             } else {
-                emitPacket(socket, "joinAccept", i, this.board.nInARow,
-                    this.teamCount, this.teamSize,
-                    false, this.board.width, this.board.height);
+                emitPacket(socket, "joinAccept", i, {
+                    nInARow: this.board.nInARow,
+                    teamCount: this.teamCount,
+                    teamSize: this.teamSize,
+                    gravity: this.board.gravity,
+                    infinite: false,
+                    width: this.board.width,
+                    height: this.board.height});
             }
             this.playerNames.push(packet[1]);
             this.sockets.push(socket);

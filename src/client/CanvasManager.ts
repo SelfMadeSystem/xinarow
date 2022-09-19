@@ -333,6 +333,7 @@ function _drawGrid(startX: number, startY: number, endX: number, endY: number) {
 }
 
 export function drawGrid(w?: number, h?: number) {
+    ctx.lineWidth = 1;
     if (w && h) {
         _drawGrid(0, 0, w, h);
         return;
@@ -353,11 +354,14 @@ export function drawBoard(board: Board) {
 }
 
 export function drawWinningLines(winningLines: Vec2[][]) {
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
     for (const line of winningLines) {
         drawLine(line[0][0] + 0.5, line[0][1] + 0.5, line[1][0] + 0.5, line[1][1] + 0.5);
     }
 }
 
 export function setZoomFactorForSize(w: number, h: number) {
-    zoom = clamp(Math.min(width / w, height / h), minZoom, maxZoom);
+    zoom = clamp(Math.min(width / w, height / h) * 0.95, minZoom, maxZoom);
+    pos = [(width - w * zoom) / 2, (height - h * zoom) / 2];
 }

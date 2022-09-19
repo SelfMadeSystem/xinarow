@@ -16,7 +16,7 @@ export async function join(room: string) {
 
 export async function create(...args: [
     room: string,
-    ...options: RoomOptions
+    options: RoomOptions
 ]) {
     emit("create", uid, username, ...args);
 

@@ -19,10 +19,11 @@ export abstract class BaseClientRoom {
         public readonly teamCount: PlayerColor,
         public readonly teamSize: number,
         nInARow: number = 5,
+        gravity: boolean = false,
         width: number | undefined = undefined,
         height: number | undefined = undefined,
     ) {
-        this.board = new Board(nInARow, width, height);
+        this.board = new Board(nInARow, gravity, width, height);
 
         requestAnimationFrame(this.draw.bind(this));
 
@@ -33,7 +34,7 @@ export abstract class BaseClientRoom {
             const point = CanvasManager.fromDrawPoint(x, y);
             point[0] = Math.floor(point[0]);
             point[1] = Math.floor(point[1]);
-            if (this.board.hasCell(point[0], point[1])) {
+            if (!this.board.withinBounds(point[0], point[1])) {
                 return;
             }
             this.setCell(...point);
