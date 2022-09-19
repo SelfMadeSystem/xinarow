@@ -32,6 +32,7 @@ export class OnlineClientRoom extends BaseClientRoom {
         onPacket(socket, 'gameWon', fGameWon = (winner, lines) => {
             console.log('Won!', winner, lines);
             this.winningLines = lines;
+            this.draw();
             this.end();
         })
 
