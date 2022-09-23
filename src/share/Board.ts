@@ -36,7 +36,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         if (this.maxX === undefined || this.maxY === undefined) {
             return NaN;
         }
-        for (let i = this.maxY - 1; i >= 0; i--) {
+        for (let i = this.maxY - 1; i >= (this.minY ?? 0); i--) {
             if (!this.hasCell(x, i)) {
                 return i;
             }
@@ -119,7 +119,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             if (x >= this.maxX - this.expandLength) {
                 this.maxX = x + this.expandLength + 1;
             }
-            if (y >= this.maxY - this.expandLength) {
+            if (!this.gravity && y >= this.maxY - this.expandLength) {
                 this.maxY = y + this.expandLength + 1;
             }
         }
