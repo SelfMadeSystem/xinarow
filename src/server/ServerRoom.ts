@@ -21,12 +21,14 @@ export class ServerRoom {
         public readonly roomName: string,
         public readonly teamCount = 1, // max is 8
         public readonly teamSize = 1,
+        public readonly skipTurn = false,
         nInARow: number = 5,
         gravity: boolean = false,
         width: number | undefined = undefined,
         height: number | undefined = undefined,
     ) {
         this.board = new Board(nInARow, gravity, width, height);
+        console.log("Game created: " + roomName);
     }
 
     private emit<Name extends ServerPacketNames>(name: Name,
@@ -43,7 +45,7 @@ export class ServerRoom {
             denyAction(socket, "The game has not started.");
             return;
         }
-        if (this.turn !== i) {
+        if (!this.skipTurn && this.turn !== i) {
             denyAction(socket, "It's not your turn.");
             return;
         }
@@ -54,7 +56,7 @@ export class ServerRoom {
             return;
         }
 
-        this.turn = (this.turn + 1) % (this.teamSize * this.teamCount);
+        if (!this.skipTurn) this.turn = (this.turn + 1) % (this.teamSize * this.teamCount);
 
         this.emitAction(color, x, y);
 
@@ -91,16 +93,20 @@ export class ServerRoom {
                     teamCount: this.teamCount,
                     teamSize: this.teamSize,
                     gravity: this.board.gravity,
-                    infinite: true});
+                    skipTurn: this.skipTurn,
+                    infinite: true
+                });
             } else {
                 emitPacket(socket, "joinAccept", i, {
                     nInARow: this.board.nInARow,
                     teamCount: this.teamCount,
                     teamSize: this.teamSize,
                     gravity: this.board.gravity,
+                    skipTurn: this.skipTurn,
                     infinite: false,
                     width: this.board.width,
-                    height: this.board.height});
+                    height: this.board.height
+                });
             }
             this.playerNames.push(packet[1]);
             this.sockets.push(socket);

@@ -5,6 +5,7 @@ export type RoomOptions = {
     nInARow: number,
     teamCount: PlayerColor,
     teamSize: number, // 1 for most games
+    skipTurn: boolean,
     gravity: boolean,
 } & ({
     infinite: true

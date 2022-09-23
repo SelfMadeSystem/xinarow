@@ -11,6 +11,7 @@ export class OfflineClientRoom extends BaseClientRoom {
         teamSize: number,
         nInARow: number,
         gravity: boolean,
+        _: boolean, // skipTurn
         width: number | undefined,
         height: number | undefined,
     ) {

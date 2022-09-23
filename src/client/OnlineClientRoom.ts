@@ -14,6 +14,7 @@ export class OnlineClientRoom extends BaseClientRoom {
         teamSize: number,
         nInARow: number,
         gravity: boolean,
+        public readonly skipTurn: boolean,
         width: number | undefined,
         height: number | undefined,
     ) {
@@ -62,7 +63,7 @@ export class OnlineClientRoom extends BaseClientRoom {
     }
 
     override setCell(x: number, y: number) {
-        if (this.turn !== this.myTurn) {
+        if (!this.skipTurn && this.turn !== this.myTurn) {
             return new Promise<string>((r) => r("It's not your turn!"));
         }
         return action(x, y);

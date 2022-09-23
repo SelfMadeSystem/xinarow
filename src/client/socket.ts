@@ -48,7 +48,11 @@ export function on(event: ServerPacketNames, listener: Function) {
         socket.on(event, (...e) => {
             const listenerers = listeners.get(event);
             if (listenerers) {
-                listenerers.forEach(l => l(...e));
+                listenerers.forEach(l => {
+                    try { l(...e) } catch (e) {
+                        console.error(e);
+                    }
+                });
             }
         })
         listeners.set(event, []);

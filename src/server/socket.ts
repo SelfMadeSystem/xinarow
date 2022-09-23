@@ -47,14 +47,14 @@ export default function socket(server?: any) {
                 return
             }
 
-            const { nInARow, teamCount, teamSize, gravity, infinite } = options;
+            const { nInARow, teamCount, teamSize, gravity, infinite, skipTurn } = options;
 
             const room = (() => {
                 if (infinite) {
-                    return new ServerRoom(roomName, teamCount, teamSize, nInARow, gravity);
+                    return new ServerRoom(roomName, teamCount, teamSize, skipTurn, nInARow, gravity);
                 }
                 const { width, height } = options;
-                return new ServerRoom(roomName, teamCount, teamSize, nInARow, gravity, width, height)
+                return new ServerRoom(roomName, teamCount, teamSize, skipTurn, nInARow, gravity, width, height)
             })();
             rooms.set(roomName, room);
             room.open(socket, [uid, username, roomName]);
