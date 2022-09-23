@@ -62,19 +62,35 @@ export function divVec2(a: Vec2, b: Vec2): Vec2 {
     return [a[0] / b[0], a[1] / b[1]];
 }
 
+export function floorVec2(a: Vec2): Vec2 {
+    return [Math.floor(a[0]), Math.floor(a[1])];
+}
+
+export function ceilVec2(a: Vec2): Vec2 {
+    return [Math.ceil(a[0]), Math.ceil(a[1])];
+}
+
+export function roundVec2(a: Vec2): Vec2 {
+    return [Math.round(a[0]), Math.round(a[1])];
+}
+
 // Function that returns the hex's z position given x and y
 export function hexZ(x: number, y: number): number {
     return -x - y;
 }
 
+const HALF_SQRT_3 = Math.sqrt(3) / 2;
+const DBL_INV_SQRT_3 = 2 / Math.sqrt(3);
+
 // Function that transforms a cartesian coordinate into a hex coordinate
 export function cartesianToHex(x: number, y: number): Vec2 {
-    return [x + y / 2, y * Math.sqrt(3) / 2];
+    return [x + y / 2, y * HALF_SQRT_3];
 }
 
 // Function that transforms a hex coordinate into a cartesian coordinate
 export function hexToCartesian(x: number, y: number): Vec2 {
-    return [x - y / 2, y * 2 / Math.sqrt(3)];
+    y *= DBL_INV_SQRT_3;
+    return [x - y / 2, y];
 }
 
 export function capitalizeFirst(s: string) {

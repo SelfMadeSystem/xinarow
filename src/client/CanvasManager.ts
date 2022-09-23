@@ -1,4 +1,4 @@
-import { PlayerColor, getHexForColor } from "../share/PlayerColor";
+import { getHexForColor } from "../share/PlayerColor";
 import { Vec2, clamp, cartesianToHex } from "../share/Utils";
 import Board from "../share/Board";
 
@@ -16,11 +16,6 @@ new ResizeObserver(() => {
     height = canvas.height = canvas.clientHeight;
     refresh();
 }).observe(canvas);
-
-
-const HALF_SQRT_3 = Math.sqrt(3) / 2;
-const QUARTER_SQRT_3 = Math.sqrt(3) / 4;
-
 
 const tapMaxTime = 150;
 
@@ -294,10 +289,10 @@ export function fromDrawPoint(x: number, y: number): Vec2 {
     return [(x - pos[0]) / zoom, (y - pos[1]) / zoom];
 }
 
-export function drawCell(x: number, y: number, color: PlayerColor) {
+export function drawCell(x: number, y: number, color: string, size: number = 1) {
     const [x1, y1] = toDrawPoint(x, y);
-    const [x2, y2] = toDrawPoint(x + 1, y + 1);
-    ctx.fillStyle = getHexForColor(color);
+    const [x2, y2] = toDrawPoint(x + size, y + size);
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc((x1 + x2) / 2, (y1 + y2) / 2, (x2 - x1) / 2, 0, 2 * Math.PI);
     ctx.fill();
@@ -320,6 +315,15 @@ function fillRect(x1: number, y1: number, x2: number, y2: number) {
     ctx.stroke();
 }
 
+function fillShape(points: Vec2[]) {
+    ctx.beginPath();
+    ctx.moveTo(...toDrawPoint(...points[0]));
+    for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(...toDrawPoint(...points[i]));
+    }
+    ctx.fill();
+}
+
 export function drawSetCell(board: Board) {
     let cell = board.lastSetCell;
     if (cell === undefined) {
@@ -328,6 +332,21 @@ export function drawSetCell(board: Board) {
     ctx.fillStyle = '#fff9';
     if (board.hex) {
         cell = cartesianToHex(...cell);
+
+        let [x, y] = cell;
+
+        x += 0.5;
+        y += 0.5;
+
+        let p1: Vec2 = [x, y - ISQRT_3];
+        let p2: Vec2 = [x + 0.5, y - HALF_ISQRT_3];
+        let p3: Vec2 = [x + 0.5, y + HALF_ISQRT_3];
+        let p4: Vec2 = [x, y + ISQRT_3];
+        let p5: Vec2 = [x - 0.5, y + HALF_ISQRT_3];
+        let p6: Vec2 = [x - 0.5, y - HALF_ISQRT_3];
+
+        fillShape([p1, p2, p3, p4, p5, p6]);
+        return;
     }
     fillRect(...cell, cell[0] + 1, cell[1] + 1);
 }
@@ -341,16 +360,35 @@ function _drawSquareGrid(startX: number, startY: number, endX: number, endY: num
     }
 }
 
+const ISQRT_3 = 1 / Math.sqrt(3);
+const HALF_ISQRT_3 = ISQRT_3 / 2;
+const HALF_SQRT_3 = Math.sqrt(3) / 2;
+
 function _drawHexGrid(startX: number, startY: number, endX: number, endY: number) {
     for (let x = startX; x < endX; x++) {
         for (let y = startY; y < endY; y++) {
-            let [x1, y1] = cartesianToHex(x, y);
-            y1 += 0.5 - QUARTER_SQRT_3;
+            let [cx, cy] = cartesianToHex(x, y);
+            cy += 0.5;
+            cx += 0.5;
 
-            drawLine(x1, y1, x1 + 1, y1);
-            drawLine(x1 + 1, y1, x1 + 1, y1 + HALF_SQRT_3);
-            drawLine(x1 + 1, y1 + HALF_SQRT_3, x1, y1 + HALF_SQRT_3);
-            drawLine(x1, y1 + HALF_SQRT_3, x1, y1);
+            let [x1, y1] = [cx, cy - ISQRT_3];
+            let [x2, y2] = [cx + 0.5, cy - HALF_ISQRT_3];
+            let [x3, y3] = [cx + 0.5, cy + HALF_ISQRT_3];
+            let [x4, y4] = [cx, cy + ISQRT_3];
+
+            drawLine(x1, y1, x2, y2);
+            drawLine(x2, y2, x3, y3);
+            drawLine(x3, y3, x4, y4);
+
+            if (x === startX) {
+                drawLine(x2 - 1, y2, x3 - 1, y3);
+            }
+            if (x === startX || y === endY - 1) {
+                drawLine(x1 - 0.5, y1 + HALF_SQRT_3, x2 - 0.5, y2 + HALF_SQRT_3);
+            }
+            if (y === startY) {
+                drawLine(x3 - 0.5, y3 - HALF_SQRT_3, x4 - 0.5, y4 - HALF_SQRT_3);
+            }
         }
     }
 }
@@ -380,7 +418,7 @@ export function drawBoard(board: Board) {
         if (board.hex) {
             [x1, y1] = cartesianToHex(x, y);
         }
-        drawCell(x1, y1, color);
+        drawCell(x1, y1, getHexForColor(color));
     }
 }
 
@@ -424,6 +462,4 @@ export function setZoomFactor(board: Board) {
     const h = max[1] - min[1];
     zoom = clamp(Math.min(width / w, height / h) * 0.95, minZoom, maxZoom);
     pos = [(width - w * zoom) / 2 + min[0], (height - h * zoom) / 2 + min[1]];
-    console.log('zoom', zoom);
-    console.log('pos', pos);
 }

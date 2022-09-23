@@ -1,9 +1,11 @@
 import { PlayerColor } from "../share/PlayerColor";
 import { Board } from "../share/Board";
 import * as CanvasManager from "./CanvasManager";
-import { hexToCartesian, Vec2 } from '../share/Utils';
+import { Vec2 } from '../share/Utils';
 import { setStatusText, setTurnText } from "./main";
 import { RoomOptions } from "../share/Protocol";
+
+const DBL_INV_SQRT_3 = 2 / Math.sqrt(3);
 
 export abstract class BaseClientRoom {
     public playerNames: string[] = [];
@@ -40,10 +42,14 @@ export abstract class BaseClientRoom {
     onTap([x, y]: Vec2) {
         let point = CanvasManager.fromDrawPoint(x, y);
         if (this.board.hex) {
-            point = hexToCartesian(...point); // TODO: fix this
+            point[1] *= DBL_INV_SQRT_3;
+            point[1] = Math.floor(point[1]);
+            point[0] -= point[1] / 2;
+            point[0] = Math.floor(point[0]);
+        } else {
+            point[0] = Math.floor(point[0]);
+            point[1] = Math.floor(point[1]);
         }
-        point[0] = Math.floor(point[0]);
-        point[1] = Math.floor(point[1]);
         if (!this.board.withinBounds(point[0], point[1])) {
             return;
         }
