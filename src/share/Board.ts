@@ -1,5 +1,5 @@
 import { PlayerColor } from "./PlayerColor";
-import { toNaturalNumber, fromNaturalNumber, Vec2, hexZ } from "./Utils";
+import { toNaturalNumber, fromNaturalNumber, Vec2 } from "./Utils";
 
 export class Board implements Iterable<[number, number, PlayerColor]> {
     public readonly cells: PlayerColor[][];
@@ -21,6 +21,8 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         if (maxX !== undefined && maxY !== undefined) {
             this.minX = 0;
             this.minY = 0;
+        } else if (gravity) {
+            this.maxY = 10;
         }
     }
 
@@ -33,10 +35,10 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
     }
 
     private getGravityY(x: number): number {
-        if (this.maxX === undefined || this.maxY === undefined) {
+        if (this.maxY === undefined) {
             return NaN;
         }
-        for (let i = this.maxY - 1; i >= (this.minY ?? 0); i--) {
+        for (let i = this.maxY - 1; i >= (this.minY ?? -Infinity); i--) {
             if (!this.hasCell(x, i)) {
                 return i;
             }
