@@ -1,5 +1,5 @@
 import { getHexForColor } from "../share/PlayerColor";
-import { Vec2, clamp, cartesianToHex } from "../share/Utils";
+import { Vec2, clamp, cartesianToHex, hexToCartesian } from "../share/Utils";
 import Board from "../share/Board";
 
 export const canvas = document.getElementById('canvas') as HTMLCanvasElement
@@ -397,17 +397,30 @@ export function drawGrid(board: Board) {
     ctx.lineWidth = 1;
 
     const fun = board.hex ? _drawHexGrid : _drawSquareGrid;
-    if (board.minX !== undefined && board.maxX !== undefined &&
-        board.minY !== undefined && board.maxY !== undefined) {
-        fun(board.minX, board.minY, board.maxX, board.maxY);
-        return;
+    let min = fromDrawPoint(0, 0);
+    let max = fromDrawPoint(width, height);
+    if (board.hex) {
+        min = hexToCartesian(...min);
+        max = hexToCartesian(...max);
+        min[0] -= width / zoom;
+        max[0] += width / zoom;
     }
-    const min = fromDrawPoint(0, 0);
-    const max = fromDrawPoint(width, height);
     min[0] = Math.floor(min[0]);
     min[1] = Math.floor(min[1]);
     max[0] = Math.floor(max[0] + 1);
     max[1] = Math.floor(max[1] + 1);
+    if (board.minY !== undefined) {
+        min[1] = board.minY;
+    }
+    if (board.maxY !== undefined) {
+        max[1] = board.maxY;
+    }
+    if (board.minX !== undefined) {
+        min[0] = board.minX;
+    }
+    if (board.maxX !== undefined) {
+        max[0] = board.maxX;
+    }
     fun(...min, ...max);
 }
 
