@@ -1,5 +1,5 @@
 import { PlayerColor, getHexForColor } from "../share/PlayerColor";
-import { Vec2, clamp } from "../share/Utils";
+import { Vec2, clamp, cartesianToHex } from "../share/Utils";
 import Board from "../share/Board";
 
 export const canvas = document.getElementById('canvas') as HTMLCanvasElement
@@ -16,6 +16,11 @@ new ResizeObserver(() => {
     height = canvas.height = canvas.clientHeight;
     refresh();
 }).observe(canvas);
+
+
+const HALF_SQRT_3 = Math.sqrt(3) / 2;
+const QUARTER_SQRT_3 = Math.sqrt(3) / 4;
+
 
 const tapMaxTime = 150;
 
@@ -315,15 +320,19 @@ function fillRect(x1: number, y1: number, x2: number, y2: number) {
     ctx.stroke();
 }
 
-export function drawSetCell(cell: Vec2 | undefined) {
+export function drawSetCell(board: Board) {
+    let cell = board.lastSetCell;
     if (cell === undefined) {
         return;
     }
     ctx.fillStyle = '#fff9';
+    if (board.hex) {
+        cell = cartesianToHex(...cell);
+    }
     fillRect(...cell, cell[0] + 1, cell[1] + 1);
 }
 
-function _drawGrid(startX: number, startY: number, endX: number, endY: number) {
+function _drawSquareGrid(startX: number, startY: number, endX: number, endY: number) {
     for (let x = startX; x <= endX; x++) {
         drawLine(x, startY, x, endY);
     }
@@ -332,12 +341,27 @@ function _drawGrid(startX: number, startY: number, endX: number, endY: number) {
     }
 }
 
+function _drawHexGrid(startX: number, startY: number, endX: number, endY: number) {
+    for (let x = startX; x < endX; x++) {
+        for (let y = startY; y < endY; y++) {
+            let [x1, y1] = cartesianToHex(x, y);
+            y1 += 0.5 - QUARTER_SQRT_3;
+
+            drawLine(x1, y1, x1 + 1, y1);
+            drawLine(x1 + 1, y1, x1 + 1, y1 + HALF_SQRT_3);
+            drawLine(x1 + 1, y1 + HALF_SQRT_3, x1, y1 + HALF_SQRT_3);
+            drawLine(x1, y1 + HALF_SQRT_3, x1, y1);
+        }
+    }
+}
+
 export function drawGrid(board: Board) {
     ctx.lineWidth = 1;
-    console.log(board);
+
+    const fun = board.hex ? _drawHexGrid : _drawSquareGrid;
     if (board.minX !== undefined && board.maxX !== undefined &&
         board.minY !== undefined && board.maxY !== undefined) {
-        _drawGrid(board.minX, board.minY, board.maxX, board.maxY);
+        fun(board.minX, board.minY, board.maxX, board.maxY);
         return;
     }
     const min = fromDrawPoint(0, 0);
@@ -346,24 +370,60 @@ export function drawGrid(board: Board) {
     min[1] = Math.floor(min[1]);
     max[0] = Math.floor(max[0] + 1);
     max[1] = Math.floor(max[1] + 1);
-    _drawGrid(...min, ...max);
+    fun(...min, ...max);
 }
 
 export function drawBoard(board: Board) {
     for (const [x, y, color] of board) {
-        drawCell(x, y, color);
+        let x1 = x;
+        let y1 = y;
+        if (board.hex) {
+            [x1, y1] = cartesianToHex(x, y);
+        }
+        drawCell(x1, y1, color);
     }
 }
 
-export function drawWinningLines(winningLines: Vec2[][]) {
+export function drawWinningLines(board: Board, winningLines: Vec2[][]) {
     ctx.lineWidth = 5;
     ctx.lineCap = 'round';
     for (const line of winningLines) {
-        drawLine(line[0][0] + 0.5, line[0][1] + 0.5, line[1][0] + 0.5, line[1][1] + 0.5);
+        let [x1, y1] = line[0];
+        let [x2, y2] = line[1];
+
+        if (board.hex) {
+            [x1, y1] = cartesianToHex(x1, y1);
+            [x2, y2] = cartesianToHex(x2, y2);
+            y1 += 0.5;
+            y2 += 0.5;
+            x1 += 0.5;
+            x2 += 0.5;
+        } else {
+            [x1, y1] = [x1 + 0.5, y1 + 0.5];
+            [x2, y2] = [x2 + 0.5, y2 + 0.5];
+        }
+
+        drawLine(x1, y1, x2, y2);
     }
 }
 
-export function setZoomFactorForSize(w: number, h: number) {
+export function setZoomFactor(board: Board) {
+    if (board.minX === undefined || board.maxX === undefined ||
+        board.minY === undefined || board.maxY === undefined) {
+        return;
+    }
+    let min: Vec2 = [board.minX, board.minY];
+    let max: Vec2 = [board.maxX, board.maxY];
+
+    if (board.hex) {
+        min = cartesianToHex(...min);
+        max = cartesianToHex(...max);
+    }
+
+    const w = max[0] - min[0];
+    const h = max[1] - min[1];
     zoom = clamp(Math.min(width / w, height / h) * 0.95, minZoom, maxZoom);
-    pos = [(width - w * zoom) / 2, (height - h * zoom) / 2];
+    pos = [(width - w * zoom) / 2 + min[0], (height - h * zoom) / 2 + min[1]];
+    console.log('zoom', zoom);
+    console.log('pos', pos);
 }

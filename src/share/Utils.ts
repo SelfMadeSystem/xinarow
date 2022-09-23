@@ -45,6 +45,7 @@ export function clamp(value: number, min: number, max: number) {
 
 export type Vec2 = [x: number, y: number];
 
+
 export function addVec2(a: Vec2, b: Vec2): Vec2 {
     return [a[0] + b[0], a[1] + b[1]];
 }
@@ -61,6 +62,20 @@ export function divVec2(a: Vec2, b: Vec2): Vec2 {
     return [a[0] / b[0], a[1] / b[1]];
 }
 
+// Function that returns the hex's z position given x and y
+export function hexZ(x: number, y: number): number {
+    return -x - y;
+}
+
+// Function that transforms a cartesian coordinate into a hex coordinate
+export function cartesianToHex(x: number, y: number): Vec2 {
+    return [x + y / 2, y * Math.sqrt(3) / 2];
+}
+
+// Function that transforms a hex coordinate into a cartesian coordinate
+export function hexToCartesian(x: number, y: number): Vec2 {
+    return [x - y / 2, y * 2 / Math.sqrt(3)];
+}
 
 export function capitalizeFirst(s: string) {
     return s.charAt(0).toUpperCase() + s.slice(1);

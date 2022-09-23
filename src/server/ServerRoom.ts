@@ -24,7 +24,8 @@ export class ServerRoom {
         this.board = new Board(options.nInARow, options.gravity,
             options.infinite ? undefined : options.width,
             options.infinite ? undefined : options.height,
-            options.infinite ? undefined : options.expandLength);
+            options.infinite ? undefined : options.expandLength,
+            options.hex);
         console.log("Game created: " + roomName);
     }
 
@@ -91,6 +92,7 @@ export class ServerRoom {
                     teamSize: this.options.teamSize,
                     gravity: this.board.gravity,
                     skipTurn: this.options.skipTurn,
+                    hex: this.options.hex,
                     infinite: true
                 });
             } else {
@@ -100,6 +102,7 @@ export class ServerRoom {
                     teamSize: this.options.teamSize,
                     gravity: this.board.gravity,
                     skipTurn: this.options.skipTurn,
+                    hex: this.options.hex,
                     infinite: false,
                     width: this.board.maxX,
                     height: this.board.maxY,

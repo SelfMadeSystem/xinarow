@@ -1,7 +1,7 @@
 import { PlayerColor } from "../share/PlayerColor";
 import { Board } from "../share/Board";
 import * as CanvasManager from "./CanvasManager";
-import { Vec2 } from '../share/Utils';
+import { hexToCartesian, Vec2 } from '../share/Utils';
 import { setStatusText, setTurnText } from "./main";
 import { RoomOptions } from "../share/Protocol";
 
@@ -23,21 +23,25 @@ export abstract class BaseClientRoom {
         this.board = new Board(options.nInARow, options.gravity,
             options.infinite ? undefined : options.width,
             options.infinite ? undefined : options.height,
-            options.infinite ? undefined : options.expandLength);
+            options.infinite ? undefined : options.expandLength,
+            options.hex);
 
         requestAnimationFrame(this.draw.bind(this));
 
         CanvasManager.onCanvasTap(this.onTapBinding = this.onTap.bind(this));
         CanvasManager.onCanvasRefresh(this.onRefreshBinding = this.draw.bind(this));
         if (this.board.maxX !== undefined && this.board.maxY !== undefined) {
-            CanvasManager.setZoomFactorForSize(this.board.maxX, this.board.maxY);
+            CanvasManager.setZoomFactor(this.board);
         }
 
         setStatusText(`Game starting...`);
     }
 
     onTap([x, y]: Vec2) {
-        const point = CanvasManager.fromDrawPoint(x, y);
+        let point = CanvasManager.fromDrawPoint(x, y);
+        if (this.board.hex) {
+            point = hexToCartesian(...point); // TODO: fix this
+        }
         point[0] = Math.floor(point[0]);
         point[1] = Math.floor(point[1]);
         if (!this.board.withinBounds(point[0], point[1])) {
@@ -64,10 +68,10 @@ export abstract class BaseClientRoom {
 
         CanvasManager.ctx.strokeStyle = 'white';
 
-        CanvasManager.drawSetCell(this.board.lastSetCell);
+        CanvasManager.drawSetCell(this.board);
         CanvasManager.drawGrid(this.board);
         CanvasManager.drawBoard(this.board);
-        CanvasManager.drawWinningLines(this.winningLines);
+        CanvasManager.drawWinningLines(this.board, this.winningLines);
     }
 
     end(reason?: string) {

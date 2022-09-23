@@ -7,6 +7,7 @@ export type RoomOptions = {
     teamSize: number, // 1 for most games
     skipTurn: boolean,
     gravity: boolean,
+    hex: boolean,
 } & ({
     infinite: true
 } | {
