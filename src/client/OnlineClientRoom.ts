@@ -1,5 +1,5 @@
 import { PlayerColor } from "../share/PlayerColor";
-import { onPacket, offPacket } from "../share/Protocol";
+import { onPacket, offPacket, RoomOptions } from "../share/Protocol";
 import { action } from "./GameHandler";
 import { socket } from './socket';
 import { Vec2 } from '../share/Utils';
@@ -10,15 +10,9 @@ export class OnlineClientRoom extends BaseClientRoom {
     constructor(
         roomName: string,
         myTurn: number,
-        teamCount: PlayerColor,
-        teamSize: number,
-        nInARow: number,
-        gravity: boolean,
-        public readonly skipTurn: boolean,
-        width: number | undefined,
-        height: number | undefined,
+        options: RoomOptions,
     ) {
-        super(roomName, myTurn, teamCount, teamSize, nInARow, gravity, width, height);
+        super(roomName, myTurn, options);
 
         let fActionTaken: (x: number, y: number, p: PlayerColor, playerTurn: number) => void;
         let fPlayers: (users: string[]) => void;
@@ -44,7 +38,7 @@ export class OnlineClientRoom extends BaseClientRoom {
 
         onPacket(socket, 'gameStarted', fGameStarted = () => {
             console.log("Started!");
-            setTurnText(this.turn, this.myTurn, this.teamSize);
+            setTurnText(this.turn, this.myTurn, this.options.teamSize);
         })
 
         this.end = (reason?: string) => {
@@ -63,7 +57,7 @@ export class OnlineClientRoom extends BaseClientRoom {
     }
 
     override setCell(x: number, y: number) {
-        if (!this.skipTurn && this.turn !== this.myTurn) {
+        if (!this.options.skipTurn && this.turn !== this.myTurn) {
             return new Promise<string>((r) => r("It's not your turn!"));
         }
         return action(x, y);

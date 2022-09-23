@@ -332,10 +332,12 @@ function _drawGrid(startX: number, startY: number, endX: number, endY: number) {
     }
 }
 
-export function drawGrid(w?: number, h?: number) {
+export function drawGrid(board: Board) {
     ctx.lineWidth = 1;
-    if (w && h) {
-        _drawGrid(0, 0, w, h);
+    console.log(board);
+    if (board.minX !== undefined && board.maxX !== undefined &&
+        board.minY !== undefined && board.maxY !== undefined) {
+        _drawGrid(board.minX, board.minY, board.maxX, board.maxY);
         return;
     }
     const min = fromDrawPoint(0, 0);

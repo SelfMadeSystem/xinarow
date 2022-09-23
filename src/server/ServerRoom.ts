@@ -1,5 +1,5 @@
 import { PlayerColor } from "../share/PlayerColor";
-import { ClientPackets, emitPacket, offPacket, onPacket, ServerPacketNames, ServerPackets } from "../share/Protocol";
+import { ClientPackets, emitPacket, offPacket, onPacket, RoomOptions, ServerPacketNames, ServerPackets } from "../share/Protocol";
 import { Board } from "../share/Board";
 import { SocketRef } from "./SocketReference";
 
@@ -19,15 +19,12 @@ export class ServerRoom {
 
     constructor(
         public readonly roomName: string,
-        public readonly teamCount = 1, // max is 8
-        public readonly teamSize = 1,
-        public readonly skipTurn = false,
-        nInARow: number = 5,
-        gravity: boolean = false,
-        width: number | undefined = undefined,
-        height: number | undefined = undefined,
+        public readonly options: RoomOptions
     ) {
-        this.board = new Board(nInARow, gravity, width, height);
+        this.board = new Board(options.nInARow, options.gravity,
+            options.infinite ? undefined : options.width,
+            options.infinite ? undefined : options.height,
+            options.infinite ? undefined : options.expandLength);
         console.log("Game created: " + roomName);
     }
 
@@ -45,18 +42,18 @@ export class ServerRoom {
             denyAction(socket, "The game has not started.");
             return;
         }
-        if (!this.skipTurn && this.turn !== i) {
+        if (!this.options.skipTurn && this.turn !== i) {
             denyAction(socket, "It's not your turn.");
             return;
         }
-        const color = Math.floor(i / this.teamSize);
+        const color = Math.floor(i / this.options.teamSize);
         const result = this.board.setCell(x, y, color);
         if (result) {
             denyAction(socket, result);
             return;
         }
 
-        if (!this.skipTurn) this.turn = (this.turn + 1) % (this.teamSize * this.teamCount);
+        if (!this.options.skipTurn) this.turn = (this.turn + 1) % (this.options.teamSize * this.options.teamCount);
 
         this.emitAction(color, x, y);
 
@@ -77,7 +74,7 @@ export class ServerRoom {
             return;
         }
         const i = this.sockets.length;
-        if (i >= this.teamCount * this.teamSize) {
+        if (i >= this.options.teamCount * this.options.teamSize) {
             emitPacket(socket, "joinReject", "Game full.");
             return;
         }
@@ -87,25 +84,26 @@ export class ServerRoom {
             }
             this.listeners.set(socket, l);
             onPacket(socket, 'action', l);
-            if (this.board.width === undefined || this.board.height === undefined) {
+            if (this.board.maxX === undefined || this.board.maxY === undefined) {
                 emitPacket(socket, "joinAccept", i, {
                     nInARow: this.board.nInARow,
-                    teamCount: this.teamCount,
-                    teamSize: this.teamSize,
+                    teamCount: this.options.teamCount,
+                    teamSize: this.options.teamSize,
                     gravity: this.board.gravity,
-                    skipTurn: this.skipTurn,
+                    skipTurn: this.options.skipTurn,
                     infinite: true
                 });
             } else {
                 emitPacket(socket, "joinAccept", i, {
                     nInARow: this.board.nInARow,
-                    teamCount: this.teamCount,
-                    teamSize: this.teamSize,
+                    teamCount: this.options.teamCount,
+                    teamSize: this.options.teamSize,
                     gravity: this.board.gravity,
-                    skipTurn: this.skipTurn,
+                    skipTurn: this.options.skipTurn,
                     infinite: false,
-                    width: this.board.width,
-                    height: this.board.height
+                    width: this.board.maxX,
+                    height: this.board.maxY,
+                    expandLength: this.board.expandLength
                 });
             }
             this.playerNames.push(packet[1]);
@@ -122,7 +120,7 @@ export class ServerRoom {
 
             this.emit("players", this.playerNames);
 
-            if (this.sockets.length === this.teamCount * this.teamSize) {
+            if (this.sockets.length === this.options.teamCount * this.options.teamSize) {
                 this.start();
             }
         } catch (e) {

@@ -3,6 +3,7 @@ import { Board } from "../share/Board";
 import * as CanvasManager from "./CanvasManager";
 import { Vec2 } from '../share/Utils';
 import { setStatusText, setTurnText } from "./main";
+import { RoomOptions } from "../share/Protocol";
 
 export abstract class BaseClientRoom {
     public playerNames: string[] = [];
@@ -17,21 +18,19 @@ export abstract class BaseClientRoom {
     constructor(
         public readonly roomName: string,
         public readonly myTurn: number,
-        public readonly teamCount: PlayerColor,
-        public readonly teamSize: number,
-        nInARow: number = 5,
-        gravity: boolean = false,
-        width: number | undefined = undefined,
-        height: number | undefined = undefined,
+        public readonly options: RoomOptions,
     ) {
-        this.board = new Board(nInARow, gravity, width, height);
+        this.board = new Board(options.nInARow, options.gravity,
+            options.infinite ? undefined : options.width,
+            options.infinite ? undefined : options.height,
+            options.infinite ? undefined : options.expandLength);
 
         requestAnimationFrame(this.draw.bind(this));
 
         CanvasManager.onCanvasTap(this.onTapBinding = this.onTap.bind(this));
         CanvasManager.onCanvasRefresh(this.onRefreshBinding = this.draw.bind(this));
-        if (this.board.width !== undefined && this.board.height !== undefined) {
-            CanvasManager.setZoomFactorForSize(this.board.width, this.board.height);
+        if (this.board.maxX !== undefined && this.board.maxY !== undefined) {
+            CanvasManager.setZoomFactorForSize(this.board.maxX, this.board.maxY);
         }
 
         setStatusText(`Game starting...`);
@@ -52,7 +51,7 @@ export abstract class BaseClientRoom {
 
         this.board.setCell(x, y, color);
 
-        setTurnText(this.turn, this.myTurn, this.teamSize);
+        setTurnText(this.turn, this.myTurn, this.options.teamSize);
 
         this.draw();
     }
@@ -66,7 +65,7 @@ export abstract class BaseClientRoom {
         CanvasManager.ctx.strokeStyle = 'white';
 
         CanvasManager.drawSetCell(this.board.lastSetCell);
-        CanvasManager.drawGrid(this.board.width, this.board.height);
+        CanvasManager.drawGrid(this.board);
         CanvasManager.drawBoard(this.board);
         CanvasManager.drawWinningLines(this.winningLines);
     }

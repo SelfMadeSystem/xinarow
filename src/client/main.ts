@@ -5,6 +5,7 @@ import { create, join } from './GameHandler';
 import { colorName } from '../share/PlayerColor';
 import { capitalizeFirst } from '../share/Utils';
 import { OfflineClientRoom } from './OfflineClientRoom';
+import { RoomOptions } from '../share/Protocol';
 
 const loadingOverlay = document.getElementById('loading')! as HTMLDivElement;
 const joinGameOverlay = document.getElementById('join-game')! as HTMLDivElement
@@ -52,12 +53,8 @@ joinButton.addEventListener('click', async () => {
     statusOverlay.style.visibility = 'visible'
     console.log('Game started')
     const [player, options] = result;
-    const { nInARow, teamCount, teamSize, infinite, gravity, skipTurn } = options;
 
-    const width = infinite ? undefined : options.width;
-    const height = infinite ? undefined : options.height;
-
-    const room = new OnlineClientRoom(roomName, player, teamCount, teamSize, nInARow, gravity, skipTurn, width, height)
+    const room = new OnlineClientRoom(roomName, player, options)
 
     room.closeCb = () => {
         joinGameOverlay.style.display = '';
@@ -77,6 +74,7 @@ const createTeamCount = document.getElementById('create-team-count')! as HTMLInp
 const createTeamSize = document.getElementById('create-team-size')! as HTMLInputElement
 const createWidth = document.getElementById('create-width')! as HTMLInputElement
 const createHeight = document.getElementById('create-height')! as HTMLInputElement
+const createExpandLength = document.getElementById('create-expand-length')! as HTMLInputElement
 const createOnline = document.getElementById('create-online')! as HTMLInputElement
 
 createButton.addEventListener('click', async () => {
@@ -89,14 +87,18 @@ createButton.addEventListener('click', async () => {
     const teamSize = parseInt(createTeamSize.value);
     const width = parseInt(createWidth.value);
     const height = parseInt(createHeight.value);
+    const expandLength = parseInt(createExpandLength.value);
     const online = createOnline.checked;
 
     joinGameOverlay.style.display = 'none'
     createGameOverlay.style.display = 'none'
     loadingOverlay.style.visibility = 'visible'
 
-    const result = online ? await (infinite ? create(roomName, { nInARow, teamCount, teamSize, gravity, skipTurn, infinite }) :
-        create(roomName, { nInARow, teamCount, teamSize, gravity, skipTurn, infinite, width, height})) : [0];
+    const options: RoomOptions = infinite ?
+        { nInARow, teamCount, teamSize, gravity, skipTurn, infinite } :
+        { nInARow, teamCount, teamSize, gravity, skipTurn, infinite, width, height, expandLength }; 
+
+    const result = online ? await (create(roomName, options)) : [0];
 
     loadingOverlay.style.visibility = '';
 
@@ -111,7 +113,7 @@ createButton.addEventListener('click', async () => {
     console.log('Game started')
     const player = result[0];
 
-    const room = new (online ? OnlineClientRoom : OfflineClientRoom)(roomName, player, teamCount, teamSize, nInARow, gravity, skipTurn, infinite ? undefined : width, infinite ? undefined : height)
+    const room = new (online ? OnlineClientRoom : OfflineClientRoom)(roomName, player, options)
 
     room.closeCb = () => {
         joinGameOverlay.style.display = '';

@@ -13,6 +13,7 @@ export type RoomOptions = {
     infinite: false,
     width: number,
     height: number,
+    expandLength: number,
 })
 
 /**

@@ -5,35 +5,37 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
     public readonly cells: PlayerColor[][];
     public readonly winningLines: [x: number, y: number][][] = [];
     public lastSetCell?: Vec2;
+    public minX?: number;
+    public minY?: number;
+
 
     constructor(
         public readonly nInARow: number = 5,
         public readonly gravity: boolean = false,
-        public readonly width: number | undefined = undefined,
-        public readonly height: number | undefined = undefined,
+        public maxX?: number,
+        public maxY?: number,
+        public expandLength: number = 0,
     ) {
         this.cells = [];
+        if (maxX !== undefined && maxY !== undefined) {
+            this.minX = 0;
+            this.minY = 0;
+        }
     }
 
     private tAI(n: number) { // To Array Index
-        if (this.width !== undefined) {
-            return n;
-        }
         return toNaturalNumber(n);
     }
 
     private fAI(n: number) { // From Array Index
-        if (this.width !== undefined) {
-            return n;
-        }
         return fromNaturalNumber(n);
     }
 
     private getGravityY(x: number): number {
-        if (this.width === undefined || this.height === undefined) {
+        if (this.maxX === undefined || this.maxY === undefined) {
             return NaN;
         }
-        for (let i = this.height - 1; i >= 0; i--) {
+        for (let i = this.maxY - 1; i >= 0; i--) {
             if (!this.hasCell(x, i)) {
                 return i;
             }
@@ -42,10 +44,17 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
     }
 
     public withinBounds(x: number, y: number): boolean {
-        if (this.width !== undefined && (x < 0 || x >= this.width)) {
+        if (this.maxX !== undefined && x >= this.maxX) {
             return false;
         }
-        if (this.height !== undefined && (y < 0 || y >= this.height)) {
+        if (this.maxY !== undefined && y >= this.maxY) {
+            return false;
+        }
+
+        if (this.minX !== undefined && x < this.minX) {
+            return false;
+        }
+        if (this.minY !== undefined && y < this.minY) {
             return false;
         }
         return true;
@@ -91,6 +100,28 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         }
         this._setCell(x, y, color);
         this.lastSetCell = [x, y];
+        this.tryExpand(x, y);
+    }
+
+    public tryExpand(x: number, y: number) {
+        if (this.expandLength > 0) {
+            if (this.maxX === undefined || this.maxY === undefined ||
+                this.minX === undefined || this.minY === undefined) {
+                throw new Error("Board is not fully finite.");
+            }
+            if (x < this.minX + this.expandLength) {
+                this.minX = x - this.expandLength;
+            }
+            if (y < this.minY + this.expandLength) {
+                this.minY = y - this.expandLength;
+            }
+            if (x >= this.maxX - this.expandLength) {
+                this.maxX = x + this.expandLength + 1;
+            }
+            if (y >= this.maxY - this.expandLength) {
+                this.maxY = y + this.expandLength + 1;
+            }
+        }
     }
 
     public unsetCell(x: number, y: number) {
@@ -113,11 +144,11 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
     }
 
     public isFull(): boolean {
-        if (this.width === undefined || this.height === undefined) {
+        if (this.maxX === undefined || this.maxY === undefined) {
             return false;
         }
-        for (let x = 0; x < this.width; x++) {
-            for (let y = 0; y < this.width; y++) {
+        for (let x = 0; x < this.maxX; x++) {
+            for (let y = 0; y < this.maxX; y++) {
                 if (!this.hasCell(x, y)) {
                     return false;
                 }
