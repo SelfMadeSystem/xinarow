@@ -39,6 +39,7 @@ export class OnlineClientRoom extends BaseClientRoom {
         onPacket(socket, 'gameStarted', fGameStarted = () => {
             console.log("Started!");
             setTurnText(this.turn, this.myTurn, this.options.teamSize);
+            this.startTime = Date.now();
         })
 
         this.end = (reason?: string) => {

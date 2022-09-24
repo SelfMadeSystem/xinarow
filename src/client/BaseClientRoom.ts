@@ -2,7 +2,7 @@ import { PlayerColor } from "../share/PlayerColor";
 import { Board } from "../share/Board";
 import * as CanvasManager from "./CanvasManager";
 import { Vec2 } from '../share/Utils';
-import { setStatusText, setTurnText } from "./main";
+import { setStatusText, setTimeText, setTurnText } from "./main";
 import { RoomOptions } from "../share/Protocol";
 
 const DBL_INV_SQRT_3 = 2 / Math.sqrt(3);
@@ -16,6 +16,7 @@ export abstract class BaseClientRoom {
     public closeCb: () => void = () => { };
     private onTapBinding: (v: Vec2) => void;
     private onRefreshBinding: (v: Vec2) => void;
+    public startTime: number = Date.now();
 
     constructor(
         public readonly roomName: string,
@@ -37,6 +38,18 @@ export abstract class BaseClientRoom {
         }
 
         setStatusText(`Game starting...`);
+
+        requestAnimationFrame(this.setTimeText.bind(this));
+    }
+
+    setTimeText() {
+        const time = Math.floor((Date.now() - this.startTime) / 1000);
+        const minutes = Math.floor(time / 60);
+        const seconds = time % 60;
+        setTimeText(`Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+        if (!this.ended) {
+            requestAnimationFrame(this.setTimeText.bind(this));
+        }
     }
 
     onTap([x, y]: Vec2) {

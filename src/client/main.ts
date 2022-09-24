@@ -12,6 +12,7 @@ const joinGameOverlay = document.getElementById('join-game')! as HTMLDivElement
 const createGameOverlay = document.getElementById('create-game')! as HTMLDivElement
 
 const statusOverlay = document.getElementById('turn')! as HTMLDivElement
+const timeOverlay = document.getElementById('time')! as HTMLDivElement
 
 export function setTurnText(turn: number, myTurn: number, teamSize: number) {
     if (turn === myTurn) {
@@ -27,6 +28,10 @@ export function setTurnText(turn: number, myTurn: number, teamSize: number) {
 
 export function setStatusText(text: string) {
     statusOverlay.innerText = text;
+}
+
+export function setTimeText(text: string) {
+    timeOverlay.innerText = text;
 }
 
 const joinButton = document.getElementById('join-button')! as HTMLButtonElement
