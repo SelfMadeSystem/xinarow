@@ -16,19 +16,6 @@ may add the `--host` argument to either the `dev` or `preview` command to host
 it on your local network (more than just localhost, i.e. 192.168.0.20 if your
 local ip is that).
 
-## License
-
-This project is licensed under the GNU Affero General Public License v3.0. The
-terms and conditions essentiall boil down to this (this is not legal advice):
-- You may use it any way you like
-- You may modify it under these conditions:
-    - Your modified copy must have the same license
-    - You must state the changes made
-    - You must disclose the source code of your project
-
-USE AT YOUR OWN RISK. I AM NOT RESPONSIBLE FOR ANYTHING THAT HAPPENS TO YOU OR
-YOUR COMPUTER.
-
 ## Contributing
 
 If you want to contribute, please read the [CONTRIBUTING.md](CONTRIBUTING.md)
@@ -44,3 +31,16 @@ file.
 
 If you have any issues, please open an issue on the GitHub repository. If you
 want to contact me, my discord is `SelfMadeSystem#3808`.
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0. The
+terms and conditions essentiall boil down to this (this is not legal advice):
+- You may use it any way you like
+- You may modify it under these conditions:
+    - Your modified copy must have the same license
+    - You must state the changes made
+    - You must disclose the source code of your project
+
+USE AT YOUR OWN RISK. I AM NOT RESPONSIBLE FOR ANYTHING THAT HAPPENS TO YOU OR
+YOUR COMPUTER.
