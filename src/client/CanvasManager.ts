@@ -239,7 +239,7 @@ canvas.addEventListener('touchstart', (event) => {
             const newPos: Vec2 = [newX, newY];
 
             zoom = newZoom;
-            pos = newPos; // FIXME
+            pos = newPos;
 
             prevDist = dist;
             refresh();
