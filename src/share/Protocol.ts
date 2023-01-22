@@ -1,13 +1,15 @@
 import { PlayerColor } from "./PlayerColor";
 import { jsonClone } from "./Utils";
 
+export type GridType = "square" | "hex" | "triangle";
+
 export type RoomOptions = {
     nInARow: number,
     teamCount: PlayerColor,
     teamSize: number, // 1 for most games
     skipTurn: boolean,
     gravity: boolean,
-    hex: boolean,
+    gridType: GridType,
 } & ({
     infinite: true
 } | {

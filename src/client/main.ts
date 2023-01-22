@@ -5,7 +5,7 @@ import { create, join } from './GameHandler';
 import { colorName } from '../share/PlayerColor';
 import { capitalizeFirst } from '../share/Utils';
 import { OfflineClientRoom } from './OfflineClientRoom';
-import { RoomOptions } from '../share/Protocol';
+import { GridType, RoomOptions } from '../share/Protocol';
 
 const loadingOverlay = document.getElementById('loading')! as HTMLDivElement;
 const joinGameOverlay = document.getElementById('join-game')! as HTMLDivElement
@@ -74,7 +74,7 @@ const createName = document.getElementById('create-name')! as HTMLInputElement
 const createInfinite = document.getElementById('create-infinite')! as HTMLInputElement
 const createGravity = document.getElementById('create-gravity')! as HTMLInputElement
 const createSkipTurn = document.getElementById('create-skip-turn')! as HTMLInputElement
-const createHex = document.getElementById('create-hex')! as HTMLInputElement
+const createGridType = document.getElementById('create-grid-type')! as HTMLSelectElement
 const createNInARow = document.getElementById('create-n-in-a-row')! as HTMLInputElement
 const createTeamCount = document.getElementById('create-team-count')! as HTMLInputElement
 const createTeamSize = document.getElementById('create-team-size')! as HTMLInputElement
@@ -88,7 +88,7 @@ createButton.addEventListener('click', async () => {
     const infinite = createInfinite.checked;
     const gravity = createGravity.checked;
     const skipTurn = createSkipTurn.checked;
-    const hex = createHex.checked;
+    const gridType = createGridType.value as GridType;
     const nInARow = parseInt(createNInARow.value);
     const teamCount = parseInt(createTeamCount.value);
     const teamSize = parseInt(createTeamSize.value);
@@ -102,8 +102,8 @@ createButton.addEventListener('click', async () => {
     loadingOverlay.style.visibility = 'visible'
 
     const options: RoomOptions = infinite ?
-        { nInARow, teamCount, teamSize, gravity, skipTurn, hex, infinite } :
-        { nInARow, teamCount, teamSize, gravity, skipTurn, hex, infinite, width, height, expandLength };
+        { nInARow, teamCount, teamSize, gravity, skipTurn, gridType, infinite } :
+        { nInARow, teamCount, teamSize, gravity, skipTurn, gridType, infinite, width, height, expandLength };
 
     const result = online ? await (create(roomName, options)) : [0];
 

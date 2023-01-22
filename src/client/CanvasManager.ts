@@ -2,7 +2,7 @@ import { getHexForColor } from "../share/PlayerColor";
 import { Vec2, clamp, cartesianToHex, hexToCartesian } from "../share/Utils";
 import Board from "../share/Board";
 
-export const canvas = document.getElementById('canvas') as HTMLCanvasElement
+export const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 export const ctx = canvas.getContext('2d')!;
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
@@ -117,7 +117,7 @@ canvas.addEventListener('mousedown', (event) => {
 
         pos = [oldPos[0] + diff[0], oldPos[1] + diff[1]];
         refresh();
-    }
+    };
 
     const up = (event: MouseEvent) => {
         event.preventDefault();
@@ -130,7 +130,7 @@ canvas.addEventListener('mousedown', (event) => {
         if (tap) {
             tapObservers.forEach(cb => cb(mousePos));
         }
-    }
+    };
 
     canvas.addEventListener('mousemove', move);
     canvas.addEventListener('mouseup', up);
@@ -191,7 +191,7 @@ canvas.addEventListener('touchstart', (event) => {
         [mapPos[0], mapPos[1]] = fromDrawPoint(touchPos[0], touchPos[1]);
 
         tap = false;
-    }
+    };
 
     let prevDist: number | null = null;
 
@@ -253,7 +253,7 @@ canvas.addEventListener('touchstart', (event) => {
             pos = [oldPos[0] + diff[0], oldPos[1] + diff[1]];
             refresh();
         }
-    }
+    };
 
     const up = (event: TouchEvent) => {
         event.preventDefault();
@@ -272,7 +272,7 @@ canvas.addEventListener('touchstart', (event) => {
             [oldPos[0], oldPos[1]] = pos;
             [mapPos[0], mapPos[1]] = fromDrawPoint(touchPos[0], touchPos[1]);
         }
-    }
+    };
 
     canvas.addEventListener('touchstart', start);
     canvas.addEventListener('touchmove', move);
@@ -330,25 +330,31 @@ export function drawSetCell(board: Board) {
         return;
     }
     ctx.fillStyle = '#fff9';
-    if (board.hex) {
-        cell = cartesianToHex(...cell);
+    switch (board.gridType) {
+        case 'square':
+            fillRect(...cell, cell[0] + 1, cell[1] + 1);
+            break;
+        case 'hex':
+            cell = cartesianToHex(...cell);
 
-        let [x, y] = cell;
+            let [x, y] = cell;
 
-        x += 0.5;
-        y += 0.5;
+            x += 0.5;
+            y += 0.5;
 
-        let p1: Vec2 = [x, y - ISQRT_3];
-        let p2: Vec2 = [x + 0.5, y - HALF_ISQRT_3];
-        let p3: Vec2 = [x + 0.5, y + HALF_ISQRT_3];
-        let p4: Vec2 = [x, y + ISQRT_3];
-        let p5: Vec2 = [x - 0.5, y + HALF_ISQRT_3];
-        let p6: Vec2 = [x - 0.5, y - HALF_ISQRT_3];
+            let p1: Vec2 = [x, y - ISQRT_3];
+            let p2: Vec2 = [x + 0.5, y - HALF_ISQRT_3];
+            let p3: Vec2 = [x + 0.5, y + HALF_ISQRT_3];
+            let p4: Vec2 = [x, y + ISQRT_3];
+            let p5: Vec2 = [x - 0.5, y + HALF_ISQRT_3];
+            let p6: Vec2 = [x - 0.5, y - HALF_ISQRT_3];
 
-        fillShape([p1, p2, p3, p4, p5, p6]);
-        return;
+            fillShape([p1, p2, p3, p4, p5, p6]);
+            break;
+        case 'triangle':
+            fillRect(...cell, cell[0] + 1, cell[1] + 1);
+            break;
     }
-    fillRect(...cell, cell[0] + 1, cell[1] + 1);
 }
 
 function _drawSquareGrid(startX: number, startY: number, endX: number, endY: number) {
@@ -393,17 +399,67 @@ function _drawHexGrid(startX: number, startY: number, endX: number, endY: number
     }
 }
 
+function _drawTriangleGrid(startX: number, startY: number, endX: number, endY: number) {
+    const diffY = endY - startY;
+    const halfDiffY = diffY / 2;
+    for (let x = startX; x <= endX; x++) {
+        drawLine(x, startY * HALF_SQRT_3, x - halfDiffY, endY * HALF_SQRT_3);
+    }
+    for (let y = startY; y <= endY; y++) {
+        const halfY = y / 2;
+        drawLine(startX - halfY, y * HALF_SQRT_3, endX - halfY, y * HALF_SQRT_3);
+    }
+    {
+        let x1 = startX - halfDiffY + 0.5;
+        let x2 = x1 + 0.5;
+        let y1 = endY - 1;
+        let y2 = endY;
+
+        while (x1 < endX) {
+            drawLine(x1, y1 * HALF_SQRT_3, x2, y2 * HALF_SQRT_3);
+            if (x1 < startX) {
+                x1 += 0.5;
+                y1 -= 1;
+                if (x2 >= endX - halfDiffY) {
+                    x2 += 0.5;
+                    y2 -= 1;
+                } else {
+                    x2 += 1;
+                }
+            } else {
+                x1 += 1;
+                if (x1 > endX - diffY) {
+                    x2 += 0.5;
+                    y2 -= 1;
+                } else {
+                    x2 += 1;
+                }
+            }
+        }
+    }
+}
+
 export function drawGrid(board: Board) {
     ctx.lineWidth = 1;
 
-    const fun = board.hex ? _drawHexGrid : _drawSquareGrid;
+    const funs = {
+        square: _drawSquareGrid,
+        hex: _drawHexGrid,
+        triangle: _drawTriangleGrid,
+    };
+
+    const fun = funs[board.gridType];
     let min = fromDrawPoint(0, 0);
     let max = fromDrawPoint(width, height);
-    if (board.hex) {
-        min = hexToCartesian(...min);
-        max = hexToCartesian(...max);
-        min[0] -= width / zoom;
-        max[0] += width / zoom;
+    switch (board.gridType) {
+        case 'hex':
+            min = hexToCartesian(...min);
+            max = hexToCartesian(...max);
+            min[0] -= width / zoom;
+            max[0] += width / zoom;
+            break;
+        case 'triangle':
+            break;
     }
     min[0] = Math.floor(min[0]);
     min[1] = Math.floor(min[1]);
@@ -428,8 +484,9 @@ export function drawBoard(board: Board) {
     for (const [x, y, color] of board) {
         let x1 = x;
         let y1 = y;
-        if (board.hex) {
-            [x1, y1] = cartesianToHex(x, y);
+        switch (board.gridType) {
+            case 'hex':
+                [x1, y1] = cartesianToHex(x, y);
         }
         drawCell(x1, y1, getHexForColor(color));
     }
@@ -442,18 +499,24 @@ export function drawWinningLines(board: Board, winningLines: Vec2[][]) {
         let [x1, y1] = line[0];
         let [x2, y2] = line[1];
 
-        if (board.hex) {
-            [x1, y1] = cartesianToHex(x1, y1);
-            [x2, y2] = cartesianToHex(x2, y2);
-            y1 += 0.5;
-            y2 += 0.5;
-            x1 += 0.5;
-            x2 += 0.5;
-        } else {
-            [x1, y1] = [x1 + 0.5, y1 + 0.5];
-            [x2, y2] = [x2 + 0.5, y2 + 0.5];
+        switch (board.gridType) {
+            case 'square':
+                [x1, y1] = [x1 + 0.5, y1 + 0.5];
+                [x2, y2] = [x2 + 0.5, y2 + 0.5];
+                break;
+            case 'hex':
+                [x1, y1] = cartesianToHex(x1, y1);
+                [x2, y2] = cartesianToHex(x2, y2);
+                y1 += 0.5;
+                y2 += 0.5;
+                x1 += 0.5;
+                x2 += 0.5;
+                break;
+            case 'triangle':
+                [x1, y1] = [x1 + 0.5, y1 + 0.5];
+                [x2, y2] = [x2 + 0.5, y2 + 0.5];
+                break;
         }
-
         drawLine(x1, y1, x2, y2);
     }
 }
@@ -466,9 +529,10 @@ export function setZoomFactor(board: Board) {
     let min: Vec2 = [board.minX, board.minY];
     let max: Vec2 = [board.maxX, board.maxY];
 
-    if (board.hex) {
-        min = cartesianToHex(...min);
-        max = cartesianToHex(...max);
+    switch (board.gridType) {
+        case 'hex':
+            min = cartesianToHex(...min);
+            max = cartesianToHex(...max);
     }
 
     const w = max[0] - min[0];

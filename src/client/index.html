@@ -48,8 +48,12 @@
         </label>
         <br />
         <label>
-          Hexagonal:
-          <input type="checkbox" id="create-hex" />
+          Grid Type:
+          <select id="create-grid-type">
+            <option value="triangle">Triangle</option>
+            <option value="square">Square</option>
+            <option value="hex">Hexagon</option>
+          </select>
         </label>
         <br />
         <label>
@@ -74,7 +78,7 @@
         <br />
         <label>
           Height:
-          <input type="number" id="create-height" value="12" min="1" step="1" />
+          <input type="number" id="create-height" value="5" min="1" step="1" />
         </label>
         <br />
         <label>
@@ -84,7 +88,7 @@
         <br />
         <label>
           Online:
-          <input type="checkbox" id="create-online" checked />
+          <input type="checkbox" id="create-online" />
         </label>
         <br />
         <button id="create-button">Create</button>

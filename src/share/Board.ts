@@ -1,4 +1,5 @@
 import { PlayerColor } from "./PlayerColor";
+import { GridType } from "./Protocol";
 import { toNaturalNumber, fromNaturalNumber, Vec2 } from "./Utils";
 
 export class Board implements Iterable<[number, number, PlayerColor]> {
@@ -15,7 +16,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         public maxX?: number,
         public maxY?: number,
         public expandLength: number = 0,
-        public readonly hex: boolean = false,
+        public readonly gridType: GridType = "square",
     ) {
         this.cells = [];
         if (maxX !== undefined && maxY !== undefined) {
@@ -176,16 +177,23 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             }
         }
         // We want to test all directions and not just the first one that returns true
-        if (this.hex) {
-            let result1 = this.testWinHorizontal(x, y, color);
-            let result2 = this.testWinVertical(x, y, color);
-            let result3 = this.testWinDiagonalUphill(x, y, color);
-            return result1 || result2 || result3;
-        } else {
-            let result1 = this.testWinHorizontal(x, y, color);
-            let result2 = this.testWinVertical(x, y, color);
-            let result3 = this.testWinDiagonal(x, y, color);
-            return result1 || result2 || result3;
+        switch (this.gridType) {
+            case 'square': {
+                let result1 = this.testWinHorizontal(x, y, color);
+                let result2 = this.testWinVertical(x, y, color);
+                let result3 = this.testWinDiagonal(x, y, color);
+                return result1 || result2 || result3;
+            }
+            case 'hex': {
+                let result1 = this.testWinHorizontal(x, y, color);
+                let result2 = this.testWinVertical(x, y, color);
+                let result3 = this.testWinDiagonalUphill(x, y, color);
+                return result1 || result2 || result3;
+            }
+            case 'triangle':
+                throw new Error('Not implemented');
+            default:
+                throw new Error("Unknown grid type.");
         }
     }
 
@@ -313,10 +321,10 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 }
             }
             return next();
-        }
+        };
         return {
             next
-        }
+        };
     }
 
 

@@ -27,7 +27,7 @@ export abstract class BaseClientRoom {
             options.infinite ? undefined : options.width,
             options.infinite ? undefined : options.height,
             options.infinite ? undefined : options.expandLength,
-            options.hex);
+            options.gridType);
 
         requestAnimationFrame(this.draw.bind(this));
 
@@ -54,14 +54,21 @@ export abstract class BaseClientRoom {
 
     onTap([x, y]: Vec2) {
         let point = CanvasManager.fromDrawPoint(x, y);
-        if (this.board.hex) {
-            point[1] *= DBL_INV_SQRT_3;
-            point[1] = Math.floor(point[1]);
-            point[0] -= point[1] / 2;
-            point[0] = Math.floor(point[0]);
-        } else {
-            point[0] = Math.floor(point[0]);
-            point[1] = Math.floor(point[1]);
+
+        switch (this.options.gridType) {
+            case 'square':
+
+                point[0] = Math.floor(point[0]);
+                point[1] = Math.floor(point[1]);
+                break;
+            case 'hex':
+                point[1] *= DBL_INV_SQRT_3;
+                point[1] = Math.floor(point[1]);
+                point[0] -= point[1] / 2;
+                point[0] = Math.floor(point[0]);
+                break;
+            case 'triangle':
+                throw new Error('Not implemented');
         }
         if (!this.board.withinBounds(point[0], point[1])) {
             return;
