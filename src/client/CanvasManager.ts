@@ -492,7 +492,7 @@ export function drawBoard(board: Board) {
                     y1 += HALF_ISQRT_3;
                     x1 += 0.5;
                 }
-                drawCell(x1, y1, getHexForColor(color), ISQRT_3); // TODO: After looking at the grid, I realise I don't want circles here
+                drawCell(x1, y1, getHexForColor(color), ISQRT_3); // TODO: After looking at the grid, I realise I don't want circles here. Just fill the triangle. Maybe use a circle to highlight the last move?
                 break;
         }
     }
