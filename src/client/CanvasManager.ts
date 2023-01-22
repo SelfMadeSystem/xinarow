@@ -541,9 +541,13 @@ export function drawWinningLines(board: Board, winningLines: Vec2[][]) {
                 x2 += 0.5;
                 break;
             case 'triangle':
-                [x1, y1] = [x1 + 0.5, y1 + 0.5];
-                [x2, y2] = [x2 + 0.5, y2 + 0.5];
-                break;
+                [x1, y1] = cartesianToHex(x1, Math.floor(y1 / 2));
+                [x2, y2] = cartesianToHex(x2, Math.floor(y2 / 2));
+                // y1 += 0.5;
+                // y2 += 0.5;
+                // x1 += 0.5;
+                // x2 += 0.5;
+                break; // FIXME
         }
         drawLine(x1, y1, x2, y2);
     }

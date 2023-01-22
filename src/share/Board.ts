@@ -1,6 +1,6 @@
 import { PlayerColor } from "./PlayerColor";
 import { GridType } from "./Protocol";
-import { toNaturalNumber, fromNaturalNumber, Vec2 } from "./Utils";
+import { toNaturalNumber, fromNaturalNumber, Vec2, mod } from "./Utils";
 
 export class Board implements Iterable<[number, number, PlayerColor]> {
     public readonly cells: PlayerColor[][];
@@ -194,7 +194,13 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 return result1 || result2 || result3;
             }
             case 'triangle':
-                return false; // TODO: Implement triangle win conditions
+                let result1 = this.testWinHorizontalTriangle(x, y, color);
+                let result2 = this.testWinVertical(x, y, color);
+                let result3 = this.testWinVerticalTriangle(x, y, color);
+                let result4 = this.testWinDiagonalUphill(x, y, color);
+                let result5 = this.testWinDiagonalTriangleUpDown(x, y, color);
+                let result6 = this.testWinDiagonalTriangleDownhill(x, y, color);
+                return result1 || result2 || result3 || result4 || result5 || result6;
             default:
                 throw new Error("Unknown grid type.");
         }
@@ -293,6 +299,139 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         }
         if (count >= this.nInARow) {
             this.winningLines.push([[x1, y1], [x2, y2]]);
+            return true;
+        }
+        return false;
+    }
+
+    public testWinHorizontalTriangle(x: number, y: number, color: PlayerColor): boolean {
+        let count = 1;
+        let startX = x;
+        let endX = x;
+        let startY = y;
+        let endY = y;
+        let i = 1;
+        if (mod(y, 2) === 0) {
+            for (let cell = this.getCell(x - Math.floor((i + 1) / 2), y + i % 2); cell === color;
+                cell = this.getCell(x - Math.floor((++i + 1) / 2), y + i % 2)) {
+                count++;
+                startX = x - Math.floor((i + 1) / 2);
+                startY = y + i % 2;
+            }
+            i = 1;
+            for (let cell = this.getCell(x + Math.floor(i / 2), y + i % 2); cell === color;
+                cell = this.getCell(x + Math.floor(++i / 2), y + i % 2)) {
+                count++;
+                endX = x + Math.floor(i / 2);
+                endY = y + i % 2;
+            }
+        } else {
+            for (let cell = this.getCell(x - Math.floor(i / 2), y - i % 2); cell === color;
+                cell = this.getCell(x - Math.floor(++i / 2), y - i % 2)) {
+                count++;
+                startX = x - Math.floor(i / 2);
+                startY = y - i % 2;
+            }
+            i = 1;
+            for (let cell = this.getCell(x + Math.floor((i + 1) / 2), y - i % 2); cell === color;
+                cell = this.getCell(x + Math.floor((++i + 1) / 2), y - i % 2)) {
+                count++;
+                endX = x + Math.floor((i + 1) / 2);
+                endY = y - i % 2;
+            }
+        }
+        if (count >= this.nInARow) {
+            this.winningLines.push([[startX, startY], [endX, endY]]);
+            return true;
+        }
+        return false;
+    }
+
+    public testWinVerticalTriangle(x: number, y: number, color: PlayerColor): boolean {
+        let count = 1;
+        let min: Vec2 = [x, y];
+        let max: Vec2 = [x, y];
+        let i = 1;
+
+        const getPos = (i: number): Vec2 => {
+            if (mod(y, 2) === 0) {
+                return [x + Math.floor(i / 2), y - i];
+            } else {
+                return [x + Math.floor((i + 1) / 2), y - i];
+            }
+        };
+
+        for (let cell = this.getCell(...getPos(-i)); cell === color; cell = this.getCell(...getPos(-++i))) {
+            count++;
+            min = getPos(-i);
+        }
+        i = 1;
+        for (let cell = this.getCell(...getPos(i)); cell === color; cell = this.getCell(...getPos(++i))) {
+            count++;
+            max = getPos(i);
+        }
+        if (count >= this.nInARow) {
+            this.winningLines.push([min, max]);
+            return true;
+        }
+        return false;
+    }
+
+    public testWinDiagonalTriangleUpDown(x: number, y: number, color: PlayerColor): boolean {
+        let count = 1;
+        let min: Vec2 = [x, y];
+        let max: Vec2 = [x, y];
+        let i = 1;
+
+        const getPos = (i: number): Vec2 => {
+            if (mod(y, 2) === 0) {
+                return [x + Math.floor(i / 2), y - i - Math.floor(i / 2) * 2];
+            } else {
+                return [x + Math.floor((i + 1) / 2), y - i - Math.floor((i + 1) / 2) * 2];
+            }
+        };
+
+        for (let cell = this.getCell(...getPos(-i)); cell === color; cell = this.getCell(...getPos(-++i))) {
+            count++;
+            min = getPos(-i);
+        }
+        i = 1;
+        for (let cell = this.getCell(...getPos(i)); cell === color; cell = this.getCell(...getPos(++i))) {
+            count++;
+            max = getPos(i);
+        }
+        if (count >= this.nInARow) {
+            this.winningLines.push([min, max]);
+            return true;
+        }
+        return false;
+    }
+
+    public testWinDiagonalTriangleDownhill(x: number, y: number, color: PlayerColor): boolean {
+        let count = 1;
+        let min: Vec2 = [x, y];
+        let max: Vec2 = [x, y];
+        let i = 1;
+
+        const getPos = (i: number): Vec2 => {
+            if (mod(y, 2) === 0) {
+                return [x + Math.floor(i / 2), y + i];
+            } else {
+                return [x + Math.floor((i + 1) / 2), y + i];
+            }
+        };
+
+        for (let cell = this.getCell(...getPos(-i)); cell === color; cell = this.getCell(...getPos(-++i))) {
+            count++;
+            min = getPos(-i);
+        }
+        i = 1;
+        for (let cell = this.getCell(...getPos(i)); cell === color; cell = this.getCell(...getPos(++i))) {
+            count++;
+            max = getPos(i);
+        }
+        if (count >= this.nInARow) {
+            this.winningLines.push([min, max]);
             return true;
         }
         return false;
