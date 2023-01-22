@@ -541,13 +541,25 @@ export function drawWinningLines(board: Board, winningLines: Vec2[][]) {
                 x2 += 0.5;
                 break;
             case 'triangle':
+                const ogY1 = y1;
+                const ogY2 = y2;
                 [x1, y1] = cartesianToHex(x1, Math.floor(y1 / 2));
                 [x2, y2] = cartesianToHex(x2, Math.floor(y2 / 2));
-                // y1 += 0.5;
-                // y2 += 0.5;
-                // x1 += 0.5;
-                // x2 += 0.5;
-                break; // FIXME
+                x1 += 0.5;
+                x2 += 0.5;
+                if (mod(ogY1, 2) === 1) {
+                    y1 += ISQRT_3;
+                    x1 += 0.5;
+                } else {
+                    y1 += HALF_ISQRT_3;
+                }
+                if (mod(ogY2, 2) === 1) {
+                    y2 += ISQRT_3;
+                    x2 += 0.5;
+                } else {
+                    y2 += HALF_ISQRT_3;
+                }
+                break;
         }
         drawLine(x1, y1, x2, y2);
     }
