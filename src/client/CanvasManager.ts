@@ -334,7 +334,7 @@ export function drawSetCell(board: Board) {
         case 'square':
             fillRect(...cell, cell[0] + 1, cell[1] + 1);
             break;
-        case 'hex':
+        case 'hex': {
             cell = cartesianToHex(...cell);
 
             let [x, y] = cell;
@@ -342,18 +342,27 @@ export function drawSetCell(board: Board) {
             x += 0.5;
             y += 0.5;
 
-            let p1: Vec2 = [x, y - ISQRT_3];
-            let p2: Vec2 = [x + 0.5, y - HALF_ISQRT_3];
-            let p3: Vec2 = [x + 0.5, y + HALF_ISQRT_3];
-            let p4: Vec2 = [x, y + ISQRT_3];
-            let p5: Vec2 = [x - 0.5, y + HALF_ISQRT_3];
-            let p6: Vec2 = [x - 0.5, y - HALF_ISQRT_3];
+            const p1: Vec2 = [x, y - ISQRT_3];
+            const p2: Vec2 = [x + 0.5, y - HALF_ISQRT_3];
+            const p3: Vec2 = [x + 0.5, y + HALF_ISQRT_3];
+            const p4: Vec2 = [x, y + ISQRT_3];
+            const p5: Vec2 = [x - 0.5, y + HALF_ISQRT_3];
+            const p6: Vec2 = [x - 0.5, y - HALF_ISQRT_3];
 
             fillShape([p1, p2, p3, p4, p5, p6]);
             break;
-        case 'triangle':
-            fillRect(...cell, cell[0] + 1, cell[1] + 1);
+        }
+        case 'triangle': {
+            let [x, y] = cell;
+            const ymod = mod(y, 2);
+            let [x1, y1] = cartesianToHex(x, Math.floor(y / 2) + ymod);
+            let [x2, y2] = [x1 + 0.5, y1 +
+                (ymod === 0 ? 1 : -1) * HALF_SQRT_3];
+            let [x3, y3] = [x1 + 1, y1];
+
+            fillShape([[x1, y1], [x2, y2], [x3, y3]]);
             break;
+        }
     }
 }
 
@@ -430,7 +439,7 @@ function _drawTriangleGrid(startX: number, startY: number, endX: number, endY: n
             } else {
                 x2 += 1;
             }
-        }
+        } // FIXME: Doesn't work when startX or startY are negative
     }
 }
 
@@ -465,6 +474,9 @@ export function drawGrid(board: Board) {
     }
     if (board.maxY !== undefined) {
         max[1] = board.maxY;
+        if (board.gridType === 'triangle') {
+            max[1] = Math.floor(max[1] / 2);
+        }
     }
     if (board.minX !== undefined) {
         min[0] = board.minX;
@@ -486,13 +498,23 @@ export function drawBoard(board: Board) {
                 drawCell(x1, y1, getHexForColor(color));
                 break;
             case 'triangle':
-                [x1, y1] = cartesianToHex(x, Math.floor(y / 2));
-                x1 += 0.21; // TODO: Find correct offset
-                if (mod(y, 2) === 1) {
-                    y1 += HALF_ISQRT_3;
-                    x1 += 0.5;
-                }
-                drawCell(x1, y1, getHexForColor(color), ISQRT_3); // TODO: After looking at the grid, I realise I don't want circles here. Just fill the triangle. Maybe use a circle to highlight the last move?
+                const ymod = mod(y, 2);
+                [x1, y1] = cartesianToHex(x, Math.floor(y / 2) + ymod);
+                let [x2, y2] = [x1 + 0.5, y1 +
+                    (ymod === 0 ? 1 : -1) * HALF_SQRT_3];
+                let [x3, y3] = [x1 + 1, y1];
+
+                const inset = 0.125;
+
+                const d = ymod === 0 ? 1 : -1;
+
+                x1 += inset * HALF_SQRT_3;
+                y1 += inset * 0.5 * d;
+                y2 -= inset * d;
+                x3 -= inset * HALF_SQRT_3;
+                y3 += inset * 0.5 * d;
+                ctx.fillStyle = getHexForColor(color);
+                fillShape([[x1, y1], [x2, y2], [x3, y3]]);
                 break;
         }
     }

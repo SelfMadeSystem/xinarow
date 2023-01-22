@@ -1,7 +1,7 @@
 import { PlayerColor } from "../share/PlayerColor";
 import { Board } from "../share/Board";
 import * as CanvasManager from "./CanvasManager";
-import { Vec2 } from '../share/Utils';
+import { mod, Vec2 } from '../share/Utils';
 import { setStatusText, setTimeText, setTurnText } from "./main";
 import { RoomOptions } from "../share/Protocol";
 
@@ -65,10 +65,18 @@ export abstract class BaseClientRoom {
                 point[1] = Math.floor(point[1]);
                 point[0] -= point[1] / 2;
                 point[0] = Math.floor(point[0]);
-                break;
+                break; // innacurate but good enough
             case 'triangle':
+                point[1] *= DBL_INV_SQRT_3;
+                point[0] -= point[1] / 2;
+                const og = [point[0], point[1]];
                 point[0] = Math.floor(point[0]);
                 point[1] = Math.floor(point[1]);
+                point[1] *= 2;
+
+                if (mod(og[0], 1) + mod(og[1], 1) > 1) {
+                    point[1] += 1;
+                }
                 break;
         }
         if (!this.board.withinBounds(point[0], point[1])) {
