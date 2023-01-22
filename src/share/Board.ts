@@ -191,7 +191,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 return result1 || result2 || result3;
             }
             case 'triangle':
-                throw new Error('Not implemented');
+                return false; // TODO: Implement triangle win conditions
             default:
                 throw new Error("Unknown grid type.");
         }

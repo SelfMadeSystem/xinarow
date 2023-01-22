@@ -39,8 +39,12 @@ export function print<T>(value: T): T {
     return value;
 }
 
+export function mod(n: number, m: number): number {
+    return ((n % m) + m) % m;
+}
+
 export function clamp(value: number, min: number, max: number) {
-    return Math.max(Math.min(value, max), min)
+    return Math.max(Math.min(value, max), min);
 }
 
 export type Vec2 = [x: number, y: number];

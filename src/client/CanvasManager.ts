@@ -1,5 +1,5 @@
 import { getHexForColor } from "../share/PlayerColor";
-import { Vec2, clamp, cartesianToHex, hexToCartesian } from "../share/Utils";
+import { Vec2, clamp, cartesianToHex, hexToCartesian, mod } from "../share/Utils";
 import Board from "../share/Board";
 
 export const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -403,37 +403,32 @@ function _drawTriangleGrid(startX: number, startY: number, endX: number, endY: n
     const diffY = endY - startY;
     const halfDiffY = diffY / 2;
     for (let x = startX; x <= endX; x++) {
-        drawLine(x, startY * HALF_SQRT_3, x - halfDiffY, endY * HALF_SQRT_3);
+        drawLine(x, startY * HALF_SQRT_3, x + halfDiffY, endY * HALF_SQRT_3);
     }
     for (let y = startY; y <= endY; y++) {
         const halfY = y / 2;
-        drawLine(startX - halfY, y * HALF_SQRT_3, endX - halfY, y * HALF_SQRT_3);
+        drawLine(startX + halfY, y * HALF_SQRT_3, endX + halfY, y * HALF_SQRT_3);
     }
     {
-        let x1 = startX - halfDiffY + 0.5;
-        let x2 = x1 + 0.5;
-        let y1 = endY - 1;
-        let y2 = endY;
+        let x1 = startX + 1;
+        let x2 = x1 - 0.5;
+        let y1 = startY;
+        let y2 = startY + 1;
 
-        while (x1 < endX) {
+        while (x1 < endX + halfDiffY) {
             drawLine(x1, y1 * HALF_SQRT_3, x2, y2 * HALF_SQRT_3);
-            if (x1 < startX) {
-                x1 += 0.5;
-                y1 -= 1;
-                if (x2 >= endX - halfDiffY) {
-                    x2 += 0.5;
-                    y2 -= 1;
-                } else {
-                    x2 += 1;
-                }
-            } else {
+            if (x1 < endX) {
                 x1 += 1;
-                if (x1 > endX - diffY) {
-                    x2 += 0.5;
-                    y2 -= 1;
-                } else {
-                    x2 += 1;
-                }
+            } else {
+                x1 += 0.5;
+                y1 += 1;
+            }
+
+            if (x2 < startX + halfDiffY) {
+                x2 += 0.5;
+                y2 += 1;
+            } else {
+                x2 += 1;
             }
         }
     }
@@ -487,8 +482,19 @@ export function drawBoard(board: Board) {
         switch (board.gridType) {
             case 'hex':
                 [x1, y1] = cartesianToHex(x, y);
+            case 'square':
+                drawCell(x1, y1, getHexForColor(color));
+                break;
+            case 'triangle':
+                [x1, y1] = cartesianToHex(x, Math.floor(y / 2));
+                x1 += 0.21; // TODO: Find correct offset
+                if (mod(y, 2) === 1) {
+                    y1 += HALF_ISQRT_3;
+                    x1 += 0.5;
+                }
+                drawCell(x1, y1, getHexForColor(color), ISQRT_3); // TODO: After looking at the grid, I realise I don't want circles here
+                break;
         }
-        drawCell(x1, y1, getHexForColor(color));
     }
 }
 

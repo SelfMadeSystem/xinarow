@@ -57,7 +57,6 @@ export abstract class BaseClientRoom {
 
         switch (this.options.gridType) {
             case 'square':
-
                 point[0] = Math.floor(point[0]);
                 point[1] = Math.floor(point[1]);
                 break;
@@ -68,7 +67,9 @@ export abstract class BaseClientRoom {
                 point[0] = Math.floor(point[0]);
                 break;
             case 'triangle':
-                throw new Error('Not implemented');
+                point[0] = Math.floor(point[0]);
+                point[1] = Math.floor(point[1]);
+                break;
         }
         if (!this.board.withinBounds(point[0], point[1])) {
             return;
