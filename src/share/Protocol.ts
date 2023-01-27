@@ -2,6 +2,7 @@ import { PlayerColor } from "./PlayerColor";
 import { jsonClone } from "./Utils";
 
 export type GridType = "square" | "hex" | "triangle";
+export type TeamOrder = "random" | "join";
 
 export type RoomOptions = {
     nInARow: number,
@@ -10,6 +11,7 @@ export type RoomOptions = {
     skipTurn: boolean,
     gravity: boolean,
     gridType: GridType,
+    teamOrder: TeamOrder,
 } & ({
     infinite: true
 } | {
@@ -48,9 +50,8 @@ export type ServerPackets = {
     pong: [timestamp: number];
     // Accepts a join request. Tells the client what color they are.
     joinAccept: [
-        player: number,
         options: RoomOptions,
-    ]
+    ];
     // Rejects a join request. Tells the client why.
     joinReject: [
         reason: string,
@@ -60,7 +61,9 @@ export type ServerPackets = {
         users: string[], // names. No need for IDs.
     ];
     // Tells the client the game started
-    gameStarted: [];
+    gameStarted: [
+        turn: number,
+    ];
     // Notifies the client that an action can't be performed.
     actionReject: [
         reason: string,

@@ -9,16 +9,15 @@ import BaseClientRoom from "./BaseClientRoom";
 export class OnlineClientRoom extends BaseClientRoom {
     constructor(
         roomName: string,
-        myTurn: number,
         options: RoomOptions,
     ) {
-        super(roomName, myTurn, options);
+        super(roomName, options);
 
         let fActionTaken: (x: number, y: number, p: PlayerColor, playerTurn: number) => void;
         let fPlayers: (users: string[]) => void;
         let fGameWon: (p: PlayerColor, l: Vec2[][]) => void;
         let fGameEnd: (s: string) => void;
-        let fGameStarted: () => void;
+        let fGameStarted: (i: number) => void;
 
         onPacket(socket, 'actionTaken', fActionTaken = this.actionTaken.bind(this));
 
@@ -36,8 +35,9 @@ export class OnlineClientRoom extends BaseClientRoom {
             this.end(reason);
         })
 
-        onPacket(socket, 'gameStarted', fGameStarted = () => {
+        onPacket(socket, 'gameStarted', fGameStarted = (i) => {
             console.log("Started!");
+            this.myTurn = i;
             setTurnText(this.turn, this.myTurn, this.options.teamSize, this.playerNames[this.turn]);
             this.startTime = Date.now();
         })

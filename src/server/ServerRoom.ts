@@ -38,16 +38,16 @@ export class ServerRoom {
         this.emit("actionTaken", x, y, color, this.turn);
     }
 
-    private doAction(socket: SocketRef, i: number, x: number, y: number) {
+    private doAction(socket: SocketRef, name: string, x: number, y: number) {
         if (!this.started) {
             denyAction(socket, "The game has not started.");
             return;
         }
-        if (!this.options.skipTurn && this.turn !== i) {
+        if (!this.options.skipTurn && this.playerNames[this.turn] !== name) {
             denyAction(socket, "It's not your turn.");
             return;
         }
-        const color = Math.floor(i / this.options.teamSize);
+        const color = Math.floor(this.turn / this.options.teamSize);
         const result = this.board.setCell(x, y, color);
         if (result) {
             denyAction(socket, result);
@@ -76,41 +76,53 @@ export class ServerRoom {
         }
         const i = this.sockets.length;
         if (i >= this.options.teamCount * this.options.teamSize) {
-            emitPacket(socket, "joinReject", "Game full.");
+            emitPacket(socket, "joinReject", "Game full."); // should never happen but just in case
+            return;
+        }
+        if (packet[1] == null || packet[1].trim() === "") {
+            emitPacket(socket, "joinReject", "Bad username.");
+            return;
+        }
+        // if (this.playerNames.some(s => s.toLowerCase() === packet[1].toLowerCase())) {
+        if (this.playerNames.includes(packet[1])) {
+            emitPacket(socket, "joinReject", "Username taken.");
             return;
         }
         try {
             const l = (x: number, y: number) => {
-                this.doAction(socket, i, x, y);
+                this.doAction(socket, packet[1], x, y);
             }
+
             this.listeners.set(socket, l);
             onPacket(socket, 'action', l);
-            if (this.board.maxX === undefined || this.board.maxY === undefined) {
-                emitPacket(socket, "joinAccept", i, {
-                    nInARow: this.board.nInARow,
-                    teamCount: this.options.teamCount,
-                    teamSize: this.options.teamSize,
-                    gravity: this.board.gravity,
-                    skipTurn: this.options.skipTurn,
-                    gridType: this.options.gridType,
-                    infinite: true
-                });
-            } else {
-                emitPacket(socket, "joinAccept", i, {
-                    nInARow: this.board.nInARow,
-                    teamCount: this.options.teamCount,
-                    teamSize: this.options.teamSize,
-                    gravity: this.board.gravity,
-                    skipTurn: this.options.skipTurn,
-                    gridType: this.options.gridType,
-                    infinite: false,
-                    width: this.board.maxX,
-                    height: this.board.maxY * (this.options.gridType === 'triangle' ? 0.5 : 1),
-                    expandLength: this.board.expandLength
-                });
+            emitPacket(socket, "joinAccept", {
+                nInARow: this.board.nInARow,
+                teamCount: this.options.teamCount,
+                teamSize: this.options.teamSize,
+                gravity: this.board.gravity,
+                skipTurn: this.options.skipTurn,
+                gridType: this.options.gridType,
+                teamOrder: this.options.teamOrder,
+                ...((this.board.maxX === undefined || this.board.maxY === undefined) ?
+                    { infinite: true } :
+                    {
+                        infinite: false,
+                        width: this.board.maxX,
+                        height: this.board.maxY * (this.options.gridType === 'triangle' ? 0.5 : 1),
+                        expandLength: this.board.expandLength
+                    })
+            });
+            let turn = i;
+
+            switch (this.options.teamOrder) {
+                case "random": 
+                    turn = Math.floor(Math.random() * (i + 1));
+                    break;
             }
-            this.playerNames.push(packet[1]);
-            this.sockets.push(socket);
+
+            this.playerNames.splice(turn, 0, packet[1]);
+            this.sockets.splice(turn, 0, socket);
+            console.log(turn, this.options.teamOrder, this.playerNames);
 
             socket.on('disconnect', () => {
                 socket.callIfNotReplaced(() => {
@@ -136,7 +148,9 @@ export class ServerRoom {
             return;
         }
         this.started = true;
-        this.emit('gameStarted');
+        for (let i = 0; i < this.sockets.length; i++) {
+            emitPacket(this.sockets[i], 'gameStarted', i);
+        }
         console.log("Game Started: ", this.roomName);
     }
 

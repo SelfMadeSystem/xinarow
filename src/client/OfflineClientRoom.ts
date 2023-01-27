@@ -6,10 +6,9 @@ export class OfflineClientRoom extends BaseClientRoom {
 
     constructor(
         roomName: string,
-        myTurn: number,
         options: RoomOptions,
     ) {
-        super(roomName, myTurn, options);
+        super(roomName, options);
 
         setTurnText(this.turn, -1, this.options.teamSize);
     }

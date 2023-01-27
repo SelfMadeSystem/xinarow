@@ -12,6 +12,7 @@ export abstract class BaseClientRoom {
     public readonly board: Board;
     public winningLines: Vec2[][] = [];
     public turn: number = 0;
+    public myTurn: number = -1;
     public ended: boolean = false;
     public closeCb: () => void = () => { };
     public placedThingCb: () => void = () => { };
@@ -22,7 +23,6 @@ export abstract class BaseClientRoom {
 
     constructor(
         public readonly roomName: string,
-        public readonly myTurn: number,
         public readonly options: RoomOptions,
     ) {
         this.board = new Board(options.nInARow, options.gravity,
