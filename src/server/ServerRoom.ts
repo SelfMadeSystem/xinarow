@@ -105,7 +105,7 @@ export class ServerRoom {
                     gridType: this.options.gridType,
                     infinite: false,
                     width: this.board.maxX,
-                    height: this.board.maxY,
+                    height: this.board.maxY * (this.options.gridType === 'triangle' ? 0.5 : 1),
                     expandLength: this.board.expandLength
                 });
             }

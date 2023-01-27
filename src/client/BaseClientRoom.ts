@@ -14,6 +14,8 @@ export abstract class BaseClientRoom {
     public turn: number = 0;
     public ended: boolean = false;
     public closeCb: () => void = () => { };
+    public placedThingCb: () => void = () => { };
+    public serverPlacedThingCb: (result: string | boolean) => void = () => { };
     private onTapBinding: (v: Vec2) => void;
     private onRefreshBinding: (v: Vec2) => void;
     public startTime: number = Date.now();
@@ -82,7 +84,9 @@ export abstract class BaseClientRoom {
         if (!this.board.withinBounds(point[0], point[1])) {
             return;
         }
-        this.setCell(...point);
+        this.placedThingCb();
+        
+        this.setCell(...point).then(this.serverPlacedThingCb)
     }
 
     actionTaken(x: number, y: number, color: PlayerColor, turn: number) {

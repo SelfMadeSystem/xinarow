@@ -128,4 +128,12 @@ createButton.addEventListener('click', async () => {
         loadingOverlay.style.visibility = '';
         statusOverlay.style.visibility = '';
     }
+
+    room.placedThingCb = () => {
+        loadingOverlay.style.visibility = 'visible'
+    }
+
+    room.serverPlacedThingCb = () => {
+        loadingOverlay.style.visibility = ''
+    }
 })

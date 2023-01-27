@@ -155,7 +155,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             return false;
         }
         for (let x = 0; x < this.maxX; x++) {
-            for (let y = 0; y < this.maxX; y++) {
+            for (let y = 0; y < this.maxY; y++) {
                 if (!this.hasCell(x, y)) {
                     return false;
                 }
