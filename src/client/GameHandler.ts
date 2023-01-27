@@ -2,6 +2,21 @@ import { RoomOptions, ServerPackets } from '../share/Protocol';
 import { awaitFor, awaitForAny, emit, uid } from './socket';
 
 let username = `user-${uid.substring(0, 8)}`;
+{
+    const localUsername = localStorage.getItem('xinarow-username');
+
+    if (localUsername !== null) {
+        username = localUsername;
+    }
+}
+export function setUsername(s: string) {
+    username = s;
+    localStorage.setItem('xinarow-username', s);
+}
+
+export function getUsername() {
+    return username;
+}
 
 export async function join(room: string) {
     emit("join", uid, username, room);

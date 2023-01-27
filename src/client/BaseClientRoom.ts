@@ -94,7 +94,7 @@ export abstract class BaseClientRoom {
 
         this.board.setCell(x, y, color);
 
-        setTurnText(this.turn, this.myTurn, this.options.teamSize);
+        setTurnText(this.turn, this.myTurn, this.options.teamSize, this.playerNames[this.turn]);
 
         this.draw();
     }

@@ -6,22 +6,32 @@ import { colorName } from '../share/PlayerColor';
 import { capitalizeFirst } from '../share/Utils';
 import { OfflineClientRoom } from './OfflineClientRoom';
 import { GridType, RoomOptions } from '../share/Protocol';
+import { setUsername, getUsername } from './GameHandler'; // TODO: implement
 
-const loadingOverlay = document.getElementById('loading')! as HTMLDivElement;
-const joinGameOverlay = document.getElementById('join-game')! as HTMLDivElement
-const createGameOverlay = document.getElementById('create-game')! as HTMLDivElement
+const mainMenuOverlay = document.getElementById('main-menu')! as HTMLDivElement
+const loadingOverlay = document.getElementById('loading')! as HTMLDivElement
+// const joinGameOverlay = document.getElementById('join-game')! as HTMLDivElement
+// const createGameOverlay = document.getElementById('create-game')! as HTMLDivElement
 
 const statusOverlay = document.getElementById('turn')! as HTMLDivElement
 const timeOverlay = document.getElementById('time')! as HTMLDivElement
 
-export function setTurnText(turn: number, myTurn: number, teamSize: number) {
+export function setTurnText(turn: number, myTurn: number, teamSize: number, username?: string) {
     if (turn === myTurn) {
         setStatusText("It's your turn.");
     } else {
-        if (teamSize === 1) {
-            setStatusText(`${capitalizeFirst(colorName(turn))}'s turn.`);
+        if (username === null) { // We're (probably) offline
+            if (teamSize === 1) { // Red's turn .
+                setStatusText(`${capitalizeFirst(colorName(turn))}'s turn.`);
+            } else { // Red #1's turn .
+                setStatusText(`${capitalizeFirst(colorName(Math.floor(turn / teamSize)))} #${turn % teamSize + 1}'s turn.`);
+            }
         } else {
-            setStatusText(`${capitalizeFirst(colorName(Math.floor(turn / teamSize)))} #${turn % teamSize + 1}'s turn.`);
+            if (teamSize === 1) { // It's Dude101 (red)'s turn .
+                setStatusText(`It's ${username} (${colorName(turn)})'s turn.`);
+            } else { // It's Dude101 (red #1)'s turn .
+                setStatusText(`It's ${username} (${colorName(Math.floor(turn / teamSize))} #${turn % teamSize + 1})'s turn.`);
+            }
         }
     }
 }
@@ -34,14 +44,24 @@ export function setTimeText(text: string) {
     timeOverlay.innerText = text;
 }
 
+const username = document.getElementById('username-input')! as HTMLInputElement
+username.value = getUsername();
+
+function onUsernameChange() {
+    setUsername(username.value);
+}
+
+username.addEventListener("change", onUsernameChange);
+username.addEventListener("keyup", onUsernameChange);
+username.addEventListener("input", onUsernameChange);
+
 const joinButton = document.getElementById('join-button')! as HTMLButtonElement
 const joinName = document.getElementById('join-name')! as HTMLInputElement
 
 joinButton.addEventListener('click', async () => {
     const roomName = joinName.value;
 
-    joinGameOverlay.style.display = 'none'
-    createGameOverlay.style.display = 'none'
+    mainMenuOverlay.style.display = 'none';
     loadingOverlay.style.visibility = 'visible'
 
     const result = await join(roomName);
@@ -50,8 +70,7 @@ joinButton.addEventListener('click', async () => {
 
     if (typeof result === 'string') {
         console.log(result);
-        joinGameOverlay.style.display = '';
-        createGameOverlay.style.display = '';
+        mainMenuOverlay.style.display = '';
         alert(result);
         return;
     }
@@ -62,8 +81,7 @@ joinButton.addEventListener('click', async () => {
     const room = new OnlineClientRoom(roomName, player, options)
 
     room.closeCb = () => {
-        joinGameOverlay.style.display = '';
-        createGameOverlay.style.display = '';
+        mainMenuOverlay.style.display = '';
         loadingOverlay.style.visibility = '';
         statusOverlay.style.visibility = '';
     }
@@ -97,9 +115,8 @@ createButton.addEventListener('click', async () => {
     const expandLength = parseInt(createExpandLength.value);
     const online = createOnline.checked;
 
-    joinGameOverlay.style.display = 'none'
-    createGameOverlay.style.display = 'none'
-    loadingOverlay.style.visibility = 'visible'
+    mainMenuOverlay.style.display = 'none';
+    loadingOverlay.style.visibility = 'visible';
 
     const options: RoomOptions = infinite ?
         { nInARow, teamCount, teamSize, gravity, skipTurn, gridType, infinite } :
@@ -111,8 +128,7 @@ createButton.addEventListener('click', async () => {
 
     if (typeof result === 'string') {
         console.log(result);
-        joinGameOverlay.style.display = '';
-        createGameOverlay.style.display = '';
+        mainMenuOverlay.style.display = '';
         alert(result);
         return;
     }
@@ -123,8 +139,7 @@ createButton.addEventListener('click', async () => {
     const room = new (online ? OnlineClientRoom : OfflineClientRoom)(roomName, player, options)
 
     room.closeCb = () => {
-        joinGameOverlay.style.display = '';
-        createGameOverlay.style.display = '';
+        mainMenuOverlay.style.display = '';
         loadingOverlay.style.visibility = '';
         statusOverlay.style.visibility = '';
     }
