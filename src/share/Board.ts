@@ -22,9 +22,6 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         if (this.maxX !== undefined && this.maxY !== undefined) {
             this.minX = 0;
             this.minY = 0;
-            if (gridType === "triangle") {
-                this.maxY *= 2;
-            }
         } else if (gravity) {
             this.maxY = 10;
         }
@@ -119,14 +116,23 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             if (x < this.minX + this.expandLength) {
                 this.minX = x - this.expandLength;
             }
-            if (y < this.minY + this.expandLength) {
-                this.minY = y - this.expandLength * (this.gridType === "triangle" ? 2 : 1);
+            if (y < this.minY + this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
+                this.minY = y - this.expandLength;
+                if (this.gridType === 'triangle') {
+                    this.minY -= this.expandLength;
+                    this.minY = Math.floor(this.minY / 2) * 2;
+                }
+                console.log(this.minY);
             }
             if (x >= this.maxX - this.expandLength) {
                 this.maxX = x + this.expandLength + 1;
             }
-            if (!this.gravity && y >= this.maxY - this.expandLength) {
-                this.maxY = y + (this.expandLength + 1) * (this.gridType === "triangle" ? 2 : 1);
+            if (!this.gravity && y >= this.maxY - this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
+                this.maxY = y + this.expandLength + 1;
+                if (this.gridType === 'triangle') {
+                    this.maxY += this.expandLength + 1;
+                    this.maxY = Math.floor(this.maxY / 2) * 2;
+                }
             }
         }
     }

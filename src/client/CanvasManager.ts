@@ -409,37 +409,47 @@ function _drawHexGrid(startX: number, startY: number, endX: number, endY: number
 }
 
 function _drawTriangleGrid(startX: number, startY: number, endX: number, endY: number) {
-    const diffY = endY - startY;
-    const halfDiffY = diffY / 2;
-    for (let x = startX; x <= endX; x++) {
-        drawLine(x, startY * HALF_SQRT_3, x + halfDiffY, endY * HALF_SQRT_3);
+    const draw = (() => {
+        const sx = startX + startY * 0.5;
+        const sy = startY * HALF_SQRT_3;
+        return (x1: number, y1: number, x2: number, y2: number) => {
+            drawLine(x1 + sx, y1 + sy, x2 + sx, y2 + sy);
+        };
+    })();
+
+    const dX = endX - startX;
+    const dY = endY - startY;
+    const halfDiffY = dY / 2;
+
+    for (let x = 0; x <= dX; x++) {
+        draw(x, 0 * HALF_SQRT_3, x + halfDiffY, dY * HALF_SQRT_3);
     }
-    for (let y = startY; y <= endY; y++) {
+    for (let y = 0; y <= dY; y++) {
         const halfY = y / 2;
-        drawLine(startX + halfY, y * HALF_SQRT_3, endX + halfY, y * HALF_SQRT_3);
+        draw(0 + halfY, y * HALF_SQRT_3, dX + halfY, y * HALF_SQRT_3);
     }
     {
-        let x1 = startX + 1;
+        let x1 = 1;
         let x2 = x1 - 0.5;
-        let y1 = startY;
-        let y2 = startY + 1;
+        let y1 = 0;
+        let y2 = 0 + 1;
 
-        while (x1 < endX + halfDiffY) {
-            drawLine(x1, y1 * HALF_SQRT_3, x2, y2 * HALF_SQRT_3);
-            if (x1 < endX) {
+        while (x1 < dX + halfDiffY) {
+            draw(x1, y1 * HALF_SQRT_3, x2, y2 * HALF_SQRT_3);
+            if (x1 < dX) {
                 x1 += 1;
             } else {
                 x1 += 0.5;
                 y1 += 1;
             }
 
-            if (x2 < startX + halfDiffY) {
+            if (x2 < 0 + halfDiffY) {
                 x2 += 0.5;
                 y2 += 1;
             } else {
                 x2 += 1;
             }
-        } // FIXME: Doesn't work when startX or startY are negative
+        }
     }
 }
 
@@ -471,10 +481,13 @@ export function drawGrid(board: Board) {
     max[1] = Math.floor(max[1] + 1);
     if (board.minY !== undefined) {
         min[1] = board.minY;
+        if (board.gridType === "triangle") {
+            min[1] = Math.floor(min[1] / 2);
+        }
     }
     if (board.maxY !== undefined) {
         max[1] = board.maxY;
-        if (board.gridType === 'triangle') {
+        if (board.gridType === "triangle") {
             max[1] = Math.floor(max[1] / 2);
         }
     }
@@ -574,9 +587,13 @@ export function setZoomFactor(board: Board) {
     let max: Vec2 = [board.maxX, board.maxY];
 
     switch (board.gridType) {
+        case 'triangle':
+            min[1] /= 2;
+            max[1] /= 2;
         case 'hex':
             min = cartesianToHex(...min);
             max = cartesianToHex(...max);
+            break;
     }
 
     const w = max[0] - min[0];
