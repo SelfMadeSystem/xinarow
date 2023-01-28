@@ -1,14 +1,27 @@
 # XInARow
 
-X In A Row is a game made by SelfMadeSystem (Shoghi Simon) in which 1-8 players
-take turns placing their color in a grid (options of cartesian or hexagonal
-grids) and they try to get X amount in a row (either orthogonally or diagonally
-if in a cartesian grid).
+X In A Row is a game made by SelfMadeSystem (Shoghi Simon) in which a number of
+players take turns placing their color in a grid and they try to get X amount in
+a row (either orthogonally or diagonally).
+
+## Features
+
+Currently, the game supports:
+- 1 to 8 teams
+- 1 to 8 players per team
+- any grid size
+- any amount in a row
+- cartesian grids
+- hexagonal grids
+- triangular grids
+- usernames
+- gravity
+- expanding grids
 
 ## Building
 
-This project uses the [PNpM](https://pnpm.io) package manager. You must install
-it before building it: [PNpM install guide](https://pnpm.io/installation).
+This project uses the [pnpm](https://pnpm.io) package manager. You must install
+it before building it: [pnpm install guide](https://pnpm.io/installation).
 
 Use the command `pnpm dev` to preview it locally for development purposes,
 `pnpm build` to build the project, and `pnpm preview` to host the project. You
@@ -18,13 +31,13 @@ local ip is that).
 
 ## Contributing
 
-If you want to contribute, please read the [CONTRIBUTING.md](CONTRIBUTING.md)
-file.
+If you want to contribute, please open a pull request on the GitHub repository.
+It will be reviewed and merged if it is good.
 
 ## Credits
 
 - Shoghi Simon, SelfMadeSystem (me): Programming, design, and everything else
-- [PNpM](https://pnpm.io): Package manager
+- [pnpm](https://pnpm.io): Package manager
 - [Vite](https://vitejs.dev): Build tool
 
 ## Contact
@@ -35,7 +48,7 @@ want to contact me, my discord is `SelfMadeSystem#3808`.
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0. The
-terms and conditions essentiall boil down to this (this is not legal advice):
+terms and conditions essentially boil down to this (this is not legal advice):
 - You may use it any way you like
 - You may modify it under these conditions:
     - Your modified copy must have the same license
