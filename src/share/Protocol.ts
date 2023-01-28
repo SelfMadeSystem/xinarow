@@ -8,7 +8,7 @@ export type RoomOptions = {
     nInARow: number,
     teamCount: PlayerColor,
     teamSize: number, // 1 for most games
-    skipTurn: boolean, // FIXME: No worky since team order rewrite
+    skipTurn: boolean, // TODO: Remove this
     gravity: boolean,
     gridType: GridType,
     teamOrder: TeamOrder,
