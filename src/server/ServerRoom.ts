@@ -45,19 +45,19 @@ export class ServerRoom {
         }
         const color = Math.floor(this.turn / this.options.teamSize);
         const result = this.board.setCell(x, y, color);
-        if (result) {
+        if (typeof result === "string") {
             denyAction(socket, result);
+            return;
+        }
+
+        if (result === true) {
+            this.win(color);
             return;
         }
 
         this.turn = (this.turn + 1) % (this.options.teamSize * this.options.teamCount);
 
         this.emitAction(color, x, y);
-
-        if (this.board.testWin(x, y, color)) {
-            this.win(color);
-            return;
-        }
 
         if (this.board.isFull()) {
             this.end("Board full.");

@@ -19,7 +19,7 @@ export class OfflineClientRoom extends BaseClientRoom {
             return result;
         }
         this.turn = (this.turn + 1) % (this.options.teamSize * this.options.teamCount);
-        if (this.board.testWin(x, y, color)) {
+        if (result === true) {
             this.win();
         } else if (this.board.isFull()) {
             this.end("Board is full");

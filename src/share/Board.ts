@@ -14,6 +14,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
     public maxY: number;
     public expandLength: number = 0;
     public expandDensity: number = 0;
+    public densityPercent: boolean = false;
     public readonly gridType: GridType = "square";
 
 
@@ -26,8 +27,8 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         this.maxY = options.height;
         this.expandLength = options.expandLength;
         this.expandDensity = options.expandDensity;
+        this.densityPercent = options.densityPercent;
         this.gridType = options.gridType;
-        console.log(this.expandDensity);
     }
 
     private tAI(n: number) { // To Array Index
@@ -84,7 +85,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         return (this.cells[x] && this.cells[x][y]) !== undefined;
     }
 
-    public setCell(x: number, y: number, color: PlayerColor): void | string {
+    public setCell(x: number, y: number, color: PlayerColor): string | boolean {
         if (color < 0 || color > PlayerColor.Pink) {
             return `Color must be between 0 and ${PlayerColor.Pink}`;
         }
@@ -99,7 +100,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             }
 
             if (isNaN(y)) { // For fun, pretend that it passes, but don't actually do anything.
-                return;
+                return false;
             }
         }
         if (this.hasCell(x, y)) {
@@ -108,11 +109,12 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         this._setCell(x, y, color);
         this.lastSetCell = [x, y];
         this.tryExpand(x, y);
+
+        return this.testWin(x, y, color);
     }
 
     public tryExpand(x: number, y: number) {
         if (this.expandLength > 0) {
-            console.log(this.expandDensity);
             if (this.expandDensity === 0) {
                 if (x < this.minX + this.expandLength) {
                     this.minX = x - this.expandLength;
@@ -136,7 +138,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                     }
                 }
             } else {
-                const getDensity = (x1: number, y1: number, x2: number, y2: number) => {
+                const isDenseEnough = (x1: number, y1: number, x2: number, y2: number) => {
                     let count = 0;
 
                     for (let x = x1; x < x2; x++) { // x2 and y2 are exclusive
@@ -147,7 +149,10 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                         }
                     }
 
-                    return count / ((x2 - x1) * (y2 - y1));
+                    if (this.densityPercent) {
+                        return count / ((x2 - x1) * (y2 - y1)) >= this.expandDensity;
+                    }
+                    return count >= this.expandDensity;
                 };
 
                 // We don't want expanding to interfere with each other.
@@ -155,7 +160,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 const cbs: (() => void)[] = [];
 
                 if (x < this.minX + this.expandLength) {
-                    if (getDensity(this.minX, this.minY, this.minX + this.expandLength, this.maxY) >= this.expandDensity) {
+                    if (isDenseEnough(this.minX, this.minY, this.minX + this.expandLength, this.maxY)) {
                         cbs.push(() => {
                             this.minX -= this.expandLength;
                         });
@@ -163,7 +168,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 }
 
                 if (y < this.minY + this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
-                    if (getDensity(this.minX, this.minY, this.maxX, this.minY + this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) >= this.expandDensity) {
+                    if (isDenseEnough(this.minX, this.minY, this.maxX, this.minY + this.expandLength * (this.gridType === 'triangle' ? 2 : 1))) {
                         cbs.push(() => {
                             this.minY -= this.expandLength * (this.gridType === 'triangle' ? 2 : 1);
                         });
@@ -171,7 +176,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 }
 
                 if (x >= this.maxX - this.expandLength) {
-                    if (getDensity(this.maxX - this.expandLength, this.minY, this.maxX, this.maxY) >= this.expandDensity) {
+                    if (isDenseEnough(this.maxX - this.expandLength, this.minY, this.maxX, this.maxY)) {
                         cbs.push(() => {
                             this.maxX += this.expandLength;
                         });
@@ -179,7 +184,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 }
 
                 if (!this.gravity && y >= this.maxY - this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
-                    if (getDensity(this.minX, this.maxY - this.expandLength * (this.gridType === 'triangle' ? 2 : 1), this.maxX, this.maxY) >= this.expandDensity) {
+                    if (isDenseEnough(this.minX, this.maxY - this.expandLength * (this.gridType === 'triangle' ? 2 : 1), this.maxX, this.maxY)) {
                         cbs.push(() => {
                             this.maxY += this.expandLength * (this.gridType === 'triangle' ? 2 : 1);
                         });
@@ -225,17 +230,6 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
     }
 
     public testWin(x: number, y: number, color: PlayerColor): boolean {
-        if (this.gravity) {
-            y = this.getGravityY(x) + 1;
-
-            if (y === Infinity) {
-                y = 0;
-            }
-
-            if (isNaN(y)) { // For fun, pretend that it passes, but don't actually do anything.
-                return false;
-            }
-        }
         // We want to test all directions and not just the first one that returns true
         switch (this.gridType) {
             case 'square': {

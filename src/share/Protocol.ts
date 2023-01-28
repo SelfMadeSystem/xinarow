@@ -15,6 +15,7 @@ export type RoomOptions = {
     height: number,
     expandLength: number,
     expandDensity: number,
+    densityPercent: boolean,
 }
 
 /**

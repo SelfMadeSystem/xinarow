@@ -21,10 +21,10 @@ export default function socket(server?: any) {
         if (socket === undefined) {
             return;
         }
-        console.log('a user connected');
+        console.log('a user connected. ip: ', s.handshake.address);
 
         socket.on('disconnect', () => {
-            console.log('user disconnected');
+            console.log('user disconnected ip: ', s.handshake.address);
         });
 
         onPacket(socket, 'join', (...packet) => {

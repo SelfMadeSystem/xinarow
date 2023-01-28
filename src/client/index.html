@@ -29,14 +29,23 @@
           <label>
             Room name:
             <input type="text" id="create-name" value="" />
+          </label><br />
+          <label id="presets">
+            Presets:
+            <select id="presets-select">
+              <option value="custom"></option>
+              <option value="tictactoe">Tic Tac Toe</option>
+              <option value="connect4">Connect 4</option>
+              <option value="gomoku">Gomoku</option>
+              <option value="gomoku-10x10">Gomoku 10x10</option>
+              <option value="hex">Hex</option>
+              <option value="triangle">Triangle</option>
+              <option value="infiniteconnect4">Infinite Connect 4</option>
+              <option value="infinitegomoku">Infinite Gomoku</option>
+              <option value="infinitehex">Infinite Hex</option>
+              <option value="infinitetriangle">Infinite Triangle</option>
+            </select>
           </label>
-          <span style="display: none;">
-            <br />
-            <label>
-              Infinite Size:
-              <input type="checkbox" id="create-infinite" />
-            </label>
-          </span>
           <br />
           <label>
             Gravity:
@@ -77,12 +86,12 @@
           <br />
           <label>
             Width:
-            <input type="number" id="create-width" value="12" min="1" step="1" />
+            <input type="number" id="create-width" value="15" min="1" step="1" />
           </label>
           <br />
           <label>
             Height:
-            <input type="number" id="create-height" value="12" min="1" step="1" />
+            <input type="number" id="create-height" value="15" min="1" step="1" />
           </label>
           <br />
           <label>
@@ -92,7 +101,12 @@
           <br />
           <label>
             Expand Density:
-            <input type="number" id="create-expand-density" value="0" min="0" max="1" step="0.05" />
+            <input type="number" id="create-expand-density" value="0" min="0" max="100" step="1" />
+          </label>
+          <br />
+          <label>
+            Density Percentage (instead of count):
+            <input type="checkbox" id="create-density-percent" />
           </label>
           <br />
           <label>
