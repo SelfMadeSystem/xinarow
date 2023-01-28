@@ -20,14 +20,14 @@ export function getHexForColor(color: PlayerColor): string {
         case PlayerColor.Yellow:
             return "#ffff00";
         case PlayerColor.Purple:
-            return "#ff00ff";
+            return "#dd00bb";
         case PlayerColor.Cyan:
             return "#00ffff";
         case PlayerColor.Orange:
             return "#ff8000";
         case PlayerColor.Pink:
             return "#ff80ff";
-    }
+    } // TODO: Custom colors + colorblind mode (letters instead of colors)
 }
 
 export function colorName(color: PlayerColor) {

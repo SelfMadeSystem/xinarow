@@ -25,11 +25,7 @@ export abstract class BaseClientRoom {
         public readonly roomName: string,
         public readonly options: RoomOptions,
     ) {
-        this.board = new Board(options.nInARow, options.gravity,
-            options.infinite ? undefined : options.width,
-            options.infinite ? undefined : options.height,
-            options.infinite ? undefined : options.expandLength,
-            options.gridType);
+        this.board = new Board(options);
 
         requestAnimationFrame(this.draw.bind(this));
 

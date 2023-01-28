@@ -6,7 +6,7 @@ import { colorName } from '../share/PlayerColor';
 import { capitalizeFirst } from '../share/Utils';
 import { OfflineClientRoom } from './OfflineClientRoom';
 import { GridType, RoomOptions, TeamOrder } from '../share/Protocol';
-import { setUsername, getUsername } from './GameHandler'; // TODO: implement
+import { setUsername, getUsername } from './GameHandler';
 
 const mainMenuOverlay = document.getElementById('main-menu')! as HTMLDivElement;
 const loadingOverlay = document.getElementById('loading')! as HTMLDivElement;
@@ -89,9 +89,7 @@ joinButton.addEventListener('click', async () => {
 
 const createButton = document.getElementById('create-button')! as HTMLButtonElement;
 const createName = document.getElementById('create-name')! as HTMLInputElement;
-const createInfinite = document.getElementById('create-infinite')! as HTMLInputElement;
 const createGravity = document.getElementById('create-gravity')! as HTMLInputElement;
-const createSkipTurn = document.getElementById('create-skip-turn')! as HTMLInputElement;
 const createGridType = document.getElementById('create-grid-type')! as HTMLSelectElement;
 const createNInARow = document.getElementById('create-n-in-a-row')! as HTMLInputElement;
 const createTeamCount = document.getElementById('create-team-count')! as HTMLInputElement;
@@ -100,13 +98,12 @@ const createTeamOrder = document.getElementById('create-team-order')! as HTMLSel
 const createWidth = document.getElementById('create-width')! as HTMLInputElement;
 const createHeight = document.getElementById('create-height')! as HTMLInputElement;
 const createExpandLength = document.getElementById('create-expand-length')! as HTMLInputElement;
+const createExpandDensity = document.getElementById('create-expand-density')! as HTMLInputElement;
 const createOnline = document.getElementById('create-online')! as HTMLInputElement;
 
 createButton.addEventListener('click', async () => {
     const roomName = createName.value as string;
-    const infinite = createInfinite.checked;
     const gravity = createGravity.checked;
-    const skipTurn = createSkipTurn.checked;
     const gridType = createGridType.value as GridType;
     const nInARow = parseInt(createNInARow.value);
     const teamCount = parseInt(createTeamCount.value);
@@ -115,16 +112,15 @@ createButton.addEventListener('click', async () => {
     const width = parseInt(createWidth.value);
     const height = parseInt(createHeight.value) * (gridType === 'triangle' ? 2 : 1);
     const expandLength = parseInt(createExpandLength.value);
+    const expandDensity = parseFloat(createExpandDensity.value);
     const online = createOnline.checked;
 
     mainMenuOverlay.style.display = 'none';
     loadingOverlay.style.visibility = 'visible';
 
     const options: RoomOptions = {
-        nInARow, teamCount, teamSize, gravity, skipTurn, gridType, teamOrder,
-        ...(
-            infinite ? { infinite } : { infinite, width, height, expandLength }
-        )
+        nInARow, teamCount, teamSize, teamOrder, gravity, gridType,
+        width, height, expandLength, expandDensity
     };
 
     const result = online ? await (create(roomName, options)) : [0];

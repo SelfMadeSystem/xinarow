@@ -21,11 +21,7 @@ export class ServerRoom {
         public readonly roomName: string,
         public readonly options: RoomOptions
     ) {
-        this.board = new Board(options.nInARow, options.gravity,
-            options.infinite ? undefined : options.width,
-            options.infinite ? undefined : options.height,
-            options.infinite ? undefined : options.expandLength,
-            options.gridType);
+        this.board = new Board(options);
         console.log("Game created: " + roomName);
     }
 
@@ -43,7 +39,7 @@ export class ServerRoom {
             denyAction(socket, "The game has not started.");
             return;
         }
-        if (!this.options.skipTurn && this.playerNames[this.turn] !== name) {
+        if (this.playerNames[this.turn] !== name) {
             denyAction(socket, "It's not your turn.");
             return;
         }
@@ -54,7 +50,7 @@ export class ServerRoom {
             return;
         }
 
-        if (!this.options.skipTurn) this.turn = (this.turn + 1) % (this.options.teamSize * this.options.teamCount);
+        this.turn = (this.turn + 1) % (this.options.teamSize * this.options.teamCount);
 
         this.emitAction(color, x, y);
 
@@ -95,23 +91,7 @@ export class ServerRoom {
 
             this.listeners.set(socket, l);
             onPacket(socket, 'action', l);
-            emitPacket(socket, "joinAccept", {
-                nInARow: this.board.nInARow,
-                teamCount: this.options.teamCount,
-                teamSize: this.options.teamSize,
-                gravity: this.board.gravity,
-                skipTurn: this.options.skipTurn,
-                gridType: this.options.gridType,
-                teamOrder: this.options.teamOrder,
-                ...((this.board.maxX === undefined || this.board.maxY === undefined) ?
-                    { infinite: true } :
-                    {
-                        infinite: false,
-                        width: this.board.maxX,
-                        height: this.board.maxY,
-                        expandLength: this.board.expandLength
-                    })
-            });
+            emitPacket(socket, "joinAccept", this.options);
             let turn = i;
 
             switch (this.options.teamOrder) {

@@ -58,7 +58,7 @@ export class OnlineClientRoom extends BaseClientRoom {
     }
 
     override setCell(x: number, y: number) {
-        if (!this.options.skipTurn && this.turn !== this.myTurn) {
+        if (this.turn !== this.myTurn) {
             return Promise.resolve("It's not your turn!");
         }
         return action(x, y);

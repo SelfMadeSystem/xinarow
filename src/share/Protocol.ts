@@ -8,18 +8,14 @@ export type RoomOptions = {
     nInARow: number,
     teamCount: PlayerColor,
     teamSize: number, // 1 for most games
-    skipTurn: boolean, // TODO: Remove this
     gravity: boolean,
     gridType: GridType,
     teamOrder: TeamOrder,
-} & ({
-    infinite: true
-} | {
-    infinite: false,
     width: number,
     height: number,
     expandLength: number,
-})
+    expandDensity: number,
+}
 
 /**
  * Defines the packets for the client to server communication.

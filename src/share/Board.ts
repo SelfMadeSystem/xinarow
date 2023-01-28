@@ -1,30 +1,33 @@
 import { PlayerColor } from "./PlayerColor";
-import { GridType } from "./Protocol";
+import { GridType, RoomOptions } from "./Protocol";
 import { toNaturalNumber, fromNaturalNumber, Vec2, mod } from "./Utils";
 
 export class Board implements Iterable<[number, number, PlayerColor]> {
-    public readonly cells: PlayerColor[][];
+    public readonly cells: PlayerColor[][] = [];
     public readonly winningLines: [x: number, y: number][][] = [];
     public lastSetCell?: Vec2;
-    public minX?: number;
-    public minY?: number;
+    public readonly nInARow: number = 5;
+    public readonly gravity: boolean = false;
+    public minX: number = 0;
+    public minY: number = 0;
+    public maxX: number;
+    public maxY: number;
+    public expandLength: number = 0;
+    public expandDensity: number = 0;
+    public readonly gridType: GridType = "square";
 
 
     constructor(
-        public readonly nInARow: number = 5,
-        public readonly gravity: boolean = false,
-        public maxX?: number,
-        public maxY?: number,
-        public expandLength: number = 0,
-        public readonly gridType: GridType = "square",
+        options: RoomOptions
     ) {
-        this.cells = [];
-        if (this.maxX !== undefined && this.maxY !== undefined) {
-            this.minX = 0;
-            this.minY = 0;
-        } else if (gravity) {
-            this.maxY = 10;
-        }
+        this.nInARow = options.nInARow;
+        this.gravity = options.gravity;
+        this.maxX = options.width;
+        this.maxY = options.height;
+        this.expandLength = options.expandLength;
+        this.expandDensity = options.expandDensity;
+        this.gridType = options.gridType;
+        console.log(this.expandDensity);
     }
 
     private tAI(n: number) { // To Array Index
@@ -109,31 +112,82 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
 
     public tryExpand(x: number, y: number) {
         if (this.expandLength > 0) {
-            if (this.maxX === undefined || this.maxY === undefined ||
-                this.minX === undefined || this.minY === undefined) {
-                throw new Error("Board is not fully finite.");
-            }
-            if (x < this.minX + this.expandLength) {
-                this.minX = x - this.expandLength;
-            }
-            if (y < this.minY + this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
-                this.minY = y - this.expandLength;
-                if (this.gridType === 'triangle') {
-                    this.minY -= this.expandLength;
-                    this.minY = Math.floor(this.minY / 2) * 2;
+            console.log(this.expandDensity);
+            if (this.expandDensity === 0) {
+                if (x < this.minX + this.expandLength) {
+                    this.minX = x - this.expandLength;
                 }
-                console.log(this.minY);
-            }
-            if (x >= this.maxX - this.expandLength) {
-                this.maxX = x + this.expandLength + 1;
-            }
-            if (!this.gravity && y >= this.maxY - this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
-                this.maxY = y + this.expandLength + 1;
-                if (this.gridType === 'triangle') {
-                    this.maxY += this.expandLength + 1;
-                    this.maxY = Math.floor(this.maxY / 2) * 2;
+                if (y < this.minY + this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
+                    this.minY = y - this.expandLength;
+                    if (this.gridType === 'triangle') {
+                        this.minY -= this.expandLength;
+                        this.minY = Math.floor(this.minY / 2) * 2;
+                    }
+                    console.log(this.minY);
                 }
-            }
+                if (x >= this.maxX - this.expandLength) {
+                    this.maxX = x + this.expandLength + 1;
+                }
+                if (!this.gravity && y >= this.maxY - this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
+                    this.maxY = y + this.expandLength + 1;
+                    if (this.gridType === 'triangle') {
+                        this.maxY += this.expandLength + 1;
+                        this.maxY = Math.floor(this.maxY / 2) * 2;
+                    }
+                }
+            } else {
+                const getDensity = (x1: number, y1: number, x2: number, y2: number) => {
+                    let count = 0;
+
+                    for (let x = x1; x < x2; x++) { // x2 and y2 are exclusive
+                        for (let y = y1; y < y2; y++) {
+                            if (this.hasCell(x, y)) {
+                                count++;
+                            }
+                        }
+                    }
+
+                    return count / ((x2 - x1) * (y2 - y1));
+                };
+
+                // We don't want expanding to interfere with each other.
+                // Also unsure if this is the best way to do this, but it works.
+                const cbs: (() => void)[] = [];
+
+                if (x < this.minX + this.expandLength) {
+                    if (getDensity(this.minX, this.minY, this.minX + this.expandLength, this.maxY) >= this.expandDensity) {
+                        cbs.push(() => {
+                            this.minX -= this.expandLength;
+                        });
+                    }
+                }
+
+                if (y < this.minY + this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
+                    if (getDensity(this.minX, this.minY, this.maxX, this.minY + this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) >= this.expandDensity) {
+                        cbs.push(() => {
+                            this.minY -= this.expandLength * (this.gridType === 'triangle' ? 2 : 1);
+                        });
+                    }
+                }
+
+                if (x >= this.maxX - this.expandLength) {
+                    if (getDensity(this.maxX - this.expandLength, this.minY, this.maxX, this.maxY) >= this.expandDensity) {
+                        cbs.push(() => {
+                            this.maxX += this.expandLength;
+                        });
+                    }
+                }
+
+                if (!this.gravity && y >= this.maxY - this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
+                    if (getDensity(this.minX, this.maxY - this.expandLength * (this.gridType === 'triangle' ? 2 : 1), this.maxX, this.maxY) >= this.expandDensity) {
+                        cbs.push(() => {
+                            this.maxY += this.expandLength * (this.gridType === 'triangle' ? 2 : 1);
+                        });
+                    }
+                }
+
+                cbs.forEach(cb => cb());
+            };
         }
     }
 
@@ -173,9 +227,6 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
     public testWin(x: number, y: number, color: PlayerColor): boolean {
         if (this.gravity) {
             y = this.getGravityY(x) + 1;
-
-            console.log("Gravity Y:", y);
-            console.log(this.getCell(x, y));
 
             if (y === Infinity) {
                 y = 0;
