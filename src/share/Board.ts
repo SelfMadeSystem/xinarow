@@ -150,7 +150,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                     }
 
                     if (this.densityPercent) {
-                        return count / ((x2 - x1) * (y2 - y1)) >= this.expandDensity;
+                        return 100 * count >= this.expandDensity * (x2 - x1) * (y2 - y1);
                     }
                     return count >= this.expandDensity;
                 };
@@ -216,11 +216,11 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
     }
 
     public isFull(): boolean {
-        if (this.maxX === undefined || this.maxY === undefined) {
+        if (this.expandLength > 0) {
             return false;
         }
-        for (let x = 0; x < this.maxX; x++) {
-            for (let y = 0; y < this.maxY; y++) {
+        for (let x = this.minX; x < this.maxX; x++) {
+            for (let y = this.minY; y < this.maxY; y++) {
                 if (!this.hasCell(x, y)) {
                     return false;
                 }

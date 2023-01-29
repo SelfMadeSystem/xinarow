@@ -81,8 +81,8 @@ export abstract class BaseClientRoom {
             return;
         }
         this.placedThingCb();
-        
-        this.setCell(...point).then(this.serverPlacedThingCb)
+
+        this.setCell(...point).then(this.serverPlacedThingCb);
     }
 
     actionTaken(x: number, y: number, color: PlayerColor, turn: number) {
@@ -96,9 +96,6 @@ export abstract class BaseClientRoom {
     }
 
     draw() {
-        if (this.ended) {
-            return;
-        }
         CanvasManager.ctx.clearRect(0, 0, CanvasManager.canvas.width, CanvasManager.canvas.height);
 
         CanvasManager.ctx.strokeStyle = 'white';
@@ -113,6 +110,7 @@ export abstract class BaseClientRoom {
         this.ended = true;
         CanvasManager.offCanvasTap(this.onTapBinding);
         CanvasManager.offCanvasRefresh(this.onRefreshBinding);
+        this.draw();
         if (reason) {
             alert(reason);
         }

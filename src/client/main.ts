@@ -170,7 +170,7 @@ const defaultPreset: Preset = {
     expandLength: 0,
     expandDensity: 0,
     densityPercent: false,
-}
+};
 
 const presets: Record<string, Preset> = {
     'tictactoe': {
@@ -211,7 +211,7 @@ const presets: Record<string, Preset> = {
         height: 3,
         gravity: true,
         expandLength: 1,
-        expandDensity: 3, // it's more interesting if the board doesn't expand too fast
+        expandDensity: 2, // it's more interesting if the board doesn't expand too fast
     },
     'infinitegomoku': {
         ...defaultPreset,
@@ -250,4 +250,5 @@ presetsSelect.addEventListener('change', () => {
     createHeight.value = preset.height.toString();
     createExpandLength.value = preset.expandLength.toString();
     createExpandDensity.value = preset.expandDensity.toString();
+    createDensityPercent.checked = preset.densityPercent;
 });
