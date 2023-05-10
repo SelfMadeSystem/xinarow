@@ -15,6 +15,18 @@
       <div id="loading"></div>
       <div id="turn">Game starting...</div>
       <div id="time">Time: 0:00</div>
+      <div id="chat">
+        <div id="chat-messages">
+          <div class="message">
+            <div class="username">Username</div>
+            <div class="text">Message</div>
+          </div>
+        </div>
+        <div id="chat-input">
+          <input type="text" id="chat-input-text" value="" />
+          <button id="chat-input-button">Send</button>
+        </div>
+      </div>
       <div id="main-menu">
         <div id="join-game">
           <h1>Join game</h1>
@@ -111,7 +123,7 @@
           <br />
           <label>
             Online:
-            <input type="checkbox" id="create-online" />
+            <input checked type="checkbox" id="create-online" />
           </label>
           <br />
           <button id="create-button">Create</button>

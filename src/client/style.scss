@@ -85,3 +85,56 @@ canvas {
   background-color: #0007;
   padding: 0.25em;
 }
+
+#chat {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: min(50%, 16em);
+  height: min(50%, 32em);
+  background-color: #0007;
+  outline: 2px solid #fff;
+  padding: 0.25em;
+  pointer-events: all;
+  visibility: hidden;
+}
+
+#chat-input {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #0007;
+  min-height: 2em;
+  padding: 0.25em;
+  display: flex;
+
+  input {
+    width: 100%;
+  }
+
+  button {
+    width: 4em;
+  }
+}
+
+#chat-messages {
+  position: absolute;
+  inset: 0.25em;
+  bottom: 2.25em;
+  overflow-y: scroll;
+  scrollbar-width: none;
+
+  .message {
+    margin: 0.25em 0;
+
+    .username {
+      font-weight: bold;
+      border-bottom: 1px solid #fff;
+    }
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

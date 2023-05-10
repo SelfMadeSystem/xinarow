@@ -1,7 +1,7 @@
 import './style.scss';
 
 import { OnlineClientRoom } from './OnlineClientRoom';
-import { create, join } from './GameHandler';
+import { chat, create, join } from './GameHandler';
 import { colorName } from '../share/PlayerColor';
 import { capitalizeFirst } from '../share/Utils';
 import { OfflineClientRoom } from './OfflineClientRoom';
@@ -10,6 +10,7 @@ import { setUsername, getUsername } from './GameHandler';
 
 const mainMenuOverlay = document.getElementById('main-menu')! as HTMLDivElement;
 const loadingOverlay = document.getElementById('loading')! as HTMLDivElement;
+const chatOverlay = document.getElementById('chat')! as HTMLDivElement;
 // const joinGameOverlay = document.getElementById('join-game')! as HTMLDivElement
 // const createGameOverlay = document.getElementById('create-game')! as HTMLDivElement
 
@@ -55,8 +56,63 @@ username.addEventListener("change", onUsernameChange);
 username.addEventListener("keyup", onUsernameChange);
 username.addEventListener("input", onUsernameChange);
 
+const chatInput = document.getElementById('chat-input-text')! as HTMLInputElement;
+const chatButton = document.getElementById('chat-input-button')! as HTMLButtonElement;
+const chatMessages = document.getElementById('chat-messages')! as HTMLDivElement;
+
+export function addChatMessage(message: string, username: string) {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message');
+
+    const usernameElement = document.createElement('div');
+    usernameElement.classList.add('username');
+
+    const messageTextElement = document.createElement('div');
+    messageTextElement.classList.add('text');
+
+    usernameElement.innerText = username;
+    messageTextElement.innerText = message;
+
+    messageElement.appendChild(usernameElement);
+    messageElement.appendChild(messageTextElement);
+
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function clearChat() {
+    chatMessages.innerHTML = '';
+}
+
+function send() {
+    const message = chatInput.value;
+    if (message.trim() === '') return;
+    chatInput.value = '';
+    chat(message);
+}
+
+chatButton.addEventListener('click', send);
+chatInput.addEventListener('keyup', (event) => {
+    if (event.key === 'Enter') {
+        send();
+    }
+});
+
 const joinButton = document.getElementById('join-button')! as HTMLButtonElement;
 const joinName = document.getElementById('join-name')! as HTMLInputElement;
+
+function ingameOverlay(online = true) {
+    mainMenuOverlay.style.display = 'none';
+    statusOverlay.style.visibility = 'visible';
+    if (online || true)
+        chatOverlay.style.visibility = 'visible';
+}
+
+function menuOverlay() {
+    mainMenuOverlay.style.display = '';
+    chatOverlay.style.visibility = '';
+    statusOverlay.style.visibility = '';
+}
 
 joinButton.addEventListener('click', async () => {
     const roomName = joinName.value;
@@ -74,16 +130,18 @@ joinButton.addEventListener('click', async () => {
         alert(result);
         return;
     }
-    statusOverlay.style.visibility = 'visible';
+
+    clearChat();
+    ingameOverlay();
+
     console.log('Game started');
     const [options] = result;
 
     const room = new OnlineClientRoom(roomName, options);
 
     room.closeCb = () => {
-        mainMenuOverlay.style.display = '';
         loadingOverlay.style.visibility = '';
-        statusOverlay.style.visibility = '';
+        menuOverlay();
     };
 });
 
@@ -135,15 +193,15 @@ createButton.addEventListener('click', async () => {
         alert(result);
         return;
     }
-    statusOverlay.style.visibility = 'visible';
+    clearChat();
+    ingameOverlay(online);
     console.log('Game started');
 
     const room = new (online ? OnlineClientRoom : OfflineClientRoom)(roomName, options);
 
     room.closeCb = () => {
-        mainMenuOverlay.style.display = '';
         loadingOverlay.style.visibility = '';
-        statusOverlay.style.visibility = '';
+        menuOverlay();
     };
 
     room.placedThingCb = () => {

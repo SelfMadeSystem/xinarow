@@ -3,7 +3,7 @@ import { onPacket, offPacket, RoomOptions } from "../share/Protocol";
 import { action } from "./GameHandler";
 import { socket } from './socket';
 import { Vec2 } from '../share/Utils';
-import { setTurnText } from "./main";
+import { addChatMessage, setTurnText } from "./main";
 import BaseClientRoom from "./BaseClientRoom";
 
 export class OnlineClientRoom extends BaseClientRoom {
@@ -18,6 +18,7 @@ export class OnlineClientRoom extends BaseClientRoom {
         let fGameWon: (p: PlayerColor, l: Vec2[][]) => void;
         let fGameEnd: (s: string) => void;
         let fGameStarted: (i: number) => void;
+        let fChat: (message: string, username: string) => void;
 
         onPacket(socket, 'actionTaken', fActionTaken = this.actionTaken.bind(this));
 
@@ -42,6 +43,10 @@ export class OnlineClientRoom extends BaseClientRoom {
             this.startTime = Date.now();
         })
 
+        onPacket(socket, 'playerChat', fChat = (username: string, message: string) => {
+            addChatMessage(message, username);
+        })
+
         this.end = (reason?: string) => {
             super.end(reason);
 
@@ -54,6 +59,8 @@ export class OnlineClientRoom extends BaseClientRoom {
             offPacket(socket, 'gameEnd', fGameEnd);
 
             offPacket(socket, 'gameStarted', fGameStarted);
+
+            offPacket(socket, 'playerChat', fChat);
         }
     }
 

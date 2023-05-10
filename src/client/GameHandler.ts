@@ -55,3 +55,7 @@ export async function ping() {
     emit("ping", Date.now());
     await awaitFor("pong");
 }
+
+export function chat(message: string) {
+    emit("chat", message);
+}

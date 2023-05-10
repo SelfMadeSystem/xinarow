@@ -39,7 +39,11 @@ export type ClientPackets = {
         roomName: string,
         options: RoomOptions
     ]
+    // Action. Places a piece on the board.
     action: [x: number, y: number];
+    // Chat message. String is not sanitized nor is it sanitized on the server.
+    // It is up to the client to sanitize the string.
+    chat: [message: string];
 }
 
 export type ServerPackets = {
@@ -71,6 +75,11 @@ export type ServerPackets = {
         y: number,
         color: PlayerColor,
         playerTurn: number, // indicating who's turn it is next
+    ];
+    // Chat message.
+    playerChat: [
+        username: string,
+        message: string,
     ];
     // Tells the client the game is over because someone won.
     gameWon: [

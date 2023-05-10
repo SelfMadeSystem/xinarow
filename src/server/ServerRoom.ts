@@ -1,5 +1,5 @@
 import { PlayerColor } from "../share/PlayerColor";
-import { ClientPackets, emitPacket, offPacket, onPacket, RoomOptions, ServerPacketNames, ServerPackets } from "../share/Protocol";
+import { ClientPacketNames, ClientPackets, emitPacket, offPacket, onPacket, RoomOptions, ServerPacketNames, ServerPackets } from "../share/Protocol";
 import { Board } from "../share/Board";
 import { SocketRef } from "./SocketReference";
 
@@ -13,7 +13,7 @@ export class ServerRoom {
     private sockets: SocketRef[] = [];
     public turn: number = 0;
     public started: boolean = false;
-    private listeners: Map<SocketRef, Function> = new Map();
+    private listeners: Map<SocketRef, [ClientPacketNames, Function][]> = new Map();
     public closeCb: () => void = () => { };
     public closed: boolean = false;
 
@@ -70,37 +70,50 @@ export class ServerRoom {
             emitPacket(socket, "joinReject", "Game started.");
             return;
         }
+        const [_uid, username, _room] = packet;
         const i = this.sockets.length;
         if (i >= this.options.teamCount * this.options.teamSize) {
             emitPacket(socket, "joinReject", "Game full."); // should never happen but just in case
             return;
         }
-        if (packet[1] == null || packet[1].trim() === "") {
+        if (username == null || username.trim() === "") {
             emitPacket(socket, "joinReject", "Bad username.");
             return;
         }
-        // if (this.playerNames.some(s => s.toLowerCase() === packet[1].toLowerCase())) {
-        if (this.playerNames.includes(packet[1])) {
+        // if (this.playerNames.some(s => s.toLowerCase() === username.toLowerCase())) {
+        if (this.playerNames.includes(username)) {
             emitPacket(socket, "joinReject", "Username taken.");
             return;
         }
         try {
-            const l = (x: number, y: number) => {
-                this.doAction(socket, packet[1], x, y);
-            }
+            this.listeners.set(socket, []);
 
-            this.listeners.set(socket, l);
-            onPacket(socket, 'action', l);
+            const listen = <Name extends ClientPacketNames>(
+                name: Name,
+                listener: (...arg1: (ClientPackets)[Name]) => void) => {
+                this.listeners.get(socket)!.push([name, listener]);
+                onPacket(socket, name, listener);
+            };
+
+            listen("action", (x: number, y: number) => {
+                this.doAction(socket, username, x, y);
+            });
+
+            listen("chat", (msg: string) => {
+                if (msg.trim() === '') return;
+                this.emit("playerChat", username, msg);
+            });
+
             emitPacket(socket, "joinAccept", this.options);
             let turn = i;
 
             switch (this.options.teamOrder) {
-                case "random": 
+                case "random":
                     turn = Math.floor(Math.random() * (i + 1));
                     break;
             }
 
-            this.playerNames.splice(turn, 0, packet[1]);
+            this.playerNames.splice(turn, 0, username);
             this.sockets.splice(turn, 0, socket);
             console.log(turn, this.options.teamOrder, this.playerNames);
 
@@ -109,7 +122,7 @@ export class ServerRoom {
                     if (this.closed) {
                         return;
                     }
-                    this.end(`Player ${packet[1]} left.`);
+                    this.end(`Player ${username} left.`);
                 });
             });
 
@@ -147,7 +160,9 @@ export class ServerRoom {
     public close() {
         this.closed = true;
         this.listeners.forEach((f, s) => {
-            offPacket(s, 'action', f as any);
+            f.forEach(([name, listener]) => {
+                offPacket(s, name, listener as any);
+            });
         });
         this.closeCb();
     }
