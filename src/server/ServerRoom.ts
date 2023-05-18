@@ -39,25 +39,25 @@ export class ServerRoom {
             denyAction(socket, "The game has not started.");
             return;
         }
-        if (this.playerNames[this.turn] !== name) {
+        if (this.playerNames[Math.floor(this.turn / this.options.playerTurns)] !== name) {
             denyAction(socket, "It's not your turn.");
             return;
         }
-        const color = Math.floor(this.turn / this.options.teamSize);
+        const color = Math.floor(this.turn / this.options.teamSize / this.options.playerTurns);
         const result = this.board.setCell(x, y, color);
         if (typeof result === "string") {
             denyAction(socket, result);
             return;
         }
 
+        this.turn = (this.turn + 1) % (this.options.teamSize * this.options.teamCount * this.options.playerTurns);
+
+        this.emitAction(color, x, y);
+
         if (result === true) {
             this.win(color);
             return;
         }
-
-        this.turn = (this.turn + 1) % (this.options.teamSize * this.options.teamCount);
-
-        this.emitAction(color, x, y);
 
         if (this.board.isFull()) {
             this.end("Board full.");
@@ -76,7 +76,7 @@ export class ServerRoom {
             emitPacket(socket, "joinReject", "Game full."); // should never happen but just in case
             return;
         }
-        if (username == null || username.trim() === "") {
+        if (username == null || username.trim() === "" || username.toLowerCase() === "shoghi") {
             emitPacket(socket, "joinReject", "Bad username.");
             return;
         }

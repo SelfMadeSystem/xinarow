@@ -28,7 +28,19 @@ export default function socket(server?: any) {
         });
 
         onPacket(socket, 'join', (...packet) => {
+            const username = packet[1];
             const roomName = packet[2];
+
+            if (username.length > 64) {
+                emitPacket(socket, "joinReject", "Name too long.");
+                return
+            }
+
+            if (roomName.length > 64) {
+                emitPacket(socket, "joinReject", "Room name too long.");
+                return
+            }
+            
             if (rooms.has(roomName)) {
                 rooms.get(roomName)?.open(socket, packet);
             } else {
@@ -44,6 +56,16 @@ export default function socket(server?: any) {
 
             if (rooms.has(roomName)) {
                 emitPacket(socket, "joinReject", "Room already exists.");
+                return
+            }
+
+            if (username.length > 64) {
+                emitPacket(socket, "joinReject", "Name too long.");
+                return
+            }
+
+            if (roomName.length > 64) {
+                emitPacket(socket, "joinReject", "Room name too long.");
                 return
             }
 

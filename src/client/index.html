@@ -48,6 +48,7 @@
               <option value="custom"></option>
               <option value="tictactoe">Tic Tac Toe</option>
               <option value="connect4">Connect 4</option>
+              <option value="connect5">Connect 5 - 3 player</option>
               <option value="gomoku">Gomoku</option>
               <option value="gomoku-10x10">Gomoku 10x10</option>
               <option value="hex">Hex</option>
@@ -79,13 +80,18 @@
           </label>
           <br />
           <label>
-            Teams Count:
+            Team Count:
             <input type="number" id="create-team-count" value="2" min="1" max="8" step="1" />
           </label>
           <br />
           <label>
-            Teams Size:
+            Team Size:
             <input type="number" id="create-team-size" value="1" min="1" max="8" step="1" />
+          </label>
+          <br />
+          <label>
+            Turns Per Player:
+            <input type="number" id="create-player-turns" value="1" min="1" max="8" step="1" />
           </label>
           <br />
           <label>

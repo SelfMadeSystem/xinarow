@@ -8,6 +8,7 @@ export type RoomOptions = {
     nInARow: number,
     teamCount: PlayerColor,
     teamSize: number, // 1 for most games
+    playerTurns: number, // also 1 for most games
     gravity: boolean,
     gridType: GridType,
     teamOrder: TeamOrder,

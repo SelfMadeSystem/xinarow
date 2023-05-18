@@ -17,21 +17,21 @@ const chatOverlay = document.getElementById('chat')! as HTMLDivElement;
 const statusOverlay = document.getElementById('turn')! as HTMLDivElement;
 const timeOverlay = document.getElementById('time')! as HTMLDivElement;
 
-export function setTurnText(turn: number, myTurn: number, teamSize: number, username?: string) {
-    if (turn === myTurn) {
+export function setTurnText(turn: number, myTurn: number, { teamSize, playerTurns } : RoomOptions, names?: string[]) {
+    if (Math.floor(turn / playerTurns) === myTurn) {
         setStatusText("It's your turn.");
     } else {
-        if (username == null) { // We're (probably) offline
+        if (names == null) { // We're offline
             if (teamSize === 1) { // Red's turn .
-                setStatusText(`${capitalizeFirst(colorName(turn))}'s turn.`);
+                setStatusText(`${capitalizeFirst(colorName(Math.floor(turn / teamSize / playerTurns)))}'s turn.`);
             } else { // Red #1's turn .
-                setStatusText(`${capitalizeFirst(colorName(Math.floor(turn / teamSize)))} #${turn % teamSize + 1}'s turn.`);
+                setStatusText(`${capitalizeFirst(colorName(Math.floor(turn / teamSize / playerTurns)))} #${Math.floor(turn / playerTurns) % teamSize + 1}'s turn.`);
             }
         } else {
             if (teamSize === 1) { // It's Dude101 (red)'s turn .
-                setStatusText(`It's ${username} (${colorName(turn)})'s turn.`);
+                setStatusText(`It's ${names[Math.floor(turn / playerTurns)]} (${colorName(Math.floor(turn / playerTurns))})'s turn.`);
             } else { // It's Dude101 (red #1)'s turn .
-                setStatusText(`It's ${username} (${colorName(Math.floor(turn / teamSize))} #${turn % teamSize + 1})'s turn.`);
+                setStatusText(`It's ${names[Math.floor(turn / playerTurns)]} (${colorName(Math.floor(turn / teamSize / playerTurns))} #${Math.floor(turn / playerTurns) % teamSize + 1})'s turn.`);
             }
         }
     }
@@ -152,6 +152,7 @@ const createGridType = document.getElementById('create-grid-type')! as HTMLSelec
 const createNInARow = document.getElementById('create-n-in-a-row')! as HTMLInputElement;
 const createTeamCount = document.getElementById('create-team-count')! as HTMLInputElement;
 const createTeamSize = document.getElementById('create-team-size')! as HTMLInputElement;
+const createPlayerTurns = document.getElementById('create-player-turns')! as HTMLInputElement;
 const createTeamOrder = document.getElementById('create-team-order')! as HTMLSelectElement;
 const createWidth = document.getElementById('create-width')! as HTMLInputElement;
 const createHeight = document.getElementById('create-height')! as HTMLInputElement;
@@ -167,6 +168,7 @@ createButton.addEventListener('click', async () => {
     const nInARow = parseInt(createNInARow.value);
     const teamCount = parseInt(createTeamCount.value);
     const teamSize = parseInt(createTeamSize.value);
+    const playerTurns = parseInt(createPlayerTurns.value);
     const teamOrder = createTeamOrder.value as TeamOrder;
     const width = parseInt(createWidth.value);
     const height = parseInt(createHeight.value) * (gridType === 'triangle' ? 2 : 1);
@@ -179,7 +181,7 @@ createButton.addEventListener('click', async () => {
     loadingOverlay.style.visibility = 'visible';
 
     const options: RoomOptions = {
-        nInARow, teamCount, teamSize, teamOrder, gravity, gridType,
+        nInARow, teamCount, teamSize, teamOrder, gravity, gridType, playerTurns,
         width, height, expandLength, expandDensity, densityPercent
     };
 
@@ -223,6 +225,7 @@ const defaultPreset: Preset = {
     nInARow: 5,
     teamCount: 2,
     teamSize: 1,
+    playerTurns: 1,
     width: 15,
     height: 15,
     expandLength: 0,
@@ -242,6 +245,13 @@ const presets: Record<string, Preset> = {
         nInARow: 4,
         width: 7,
         height: 6,
+        gravity: true,
+    },
+    'connect5': {
+        ...defaultPreset,
+        nInARow: 5,
+        teamCount: 3,
+        playerTurns: 2,
         gravity: true,
     },
     'gomoku': defaultPreset,

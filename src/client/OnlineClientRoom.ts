@@ -39,7 +39,7 @@ export class OnlineClientRoom extends BaseClientRoom {
         onPacket(socket, 'gameStarted', fGameStarted = (i) => {
             console.log("Started!");
             this.myTurn = i;
-            setTurnText(this.turn, this.myTurn, this.options.teamSize, this.playerNames[this.turn]);
+            setTurnText(this.turn, this.myTurn, this.options, this.playerNames);
             this.startTime = Date.now();
         })
 
@@ -65,7 +65,7 @@ export class OnlineClientRoom extends BaseClientRoom {
     }
 
     override setCell(x: number, y: number) {
-        if (this.turn !== this.myTurn) {
+        if (Math.floor(this.turn / this.options.playerTurns) !== this.myTurn) {
             return Promise.resolve("It's not your turn!");
         }
         return action(x, y);
