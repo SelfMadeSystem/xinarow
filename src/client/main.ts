@@ -18,20 +18,22 @@ const statusOverlay = document.getElementById('turn')! as HTMLDivElement;
 const timeOverlay = document.getElementById('time')! as HTMLDivElement;
 
 export function setTurnText(turn: number, myTurn: number, { teamSize, playerTurns } : RoomOptions, names?: string[]) {
+    const color = colorName(Math.floor(turn / teamSize / playerTurns));
+    const Color = capitalizeFirst(color);
     if (Math.floor(turn / playerTurns) === myTurn) {
-        setStatusText("It's your turn.");
+        setStatusText(`It's your (${color}) turn.`);
     } else {
         if (names == null) { // We're offline
             if (teamSize === 1) { // Red's turn .
-                setStatusText(`${capitalizeFirst(colorName(Math.floor(turn / teamSize / playerTurns)))}'s turn.`);
+                setStatusText(`${Color}'s turn.`);
             } else { // Red #1's turn .
-                setStatusText(`${capitalizeFirst(colorName(Math.floor(turn / teamSize / playerTurns)))} #${Math.floor(turn / playerTurns) % teamSize + 1}'s turn.`);
+                setStatusText(`${Color} #${Math.floor(turn / playerTurns) % teamSize + 1}'s turn.`);
             }
         } else {
             if (teamSize === 1) { // It's Dude101 (red)'s turn .
-                setStatusText(`It's ${names[Math.floor(turn / playerTurns)]} (${colorName(Math.floor(turn / playerTurns))})'s turn.`);
+                setStatusText(`It's ${names[Math.floor(turn / playerTurns)]} (${color})'s turn.`);
             } else { // It's Dude101 (red #1)'s turn .
-                setStatusText(`It's ${names[Math.floor(turn / playerTurns)]} (${colorName(Math.floor(turn / teamSize / playerTurns))} #${Math.floor(turn / playerTurns) % teamSize + 1})'s turn.`);
+                setStatusText(`It's ${names[Math.floor(turn / playerTurns)]} (${color} #${Math.floor(turn / playerTurns) % teamSize + 1})'s turn.`);
             }
         }
     }
@@ -314,6 +316,7 @@ presetsSelect.addEventListener('change', () => {
     createNInARow.value = preset.nInARow.toString();
     createTeamCount.value = preset.teamCount.toString();
     createTeamSize.value = preset.teamSize.toString();
+    createPlayerTurns.value = preset.playerTurns.toString();
     createWidth.value = preset.width.toString();
     createHeight.value = preset.height.toString();
     createExpandLength.value = preset.expandLength.toString();
