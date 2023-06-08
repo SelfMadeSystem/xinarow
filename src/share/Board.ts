@@ -39,16 +39,45 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         return fromNaturalNumber(n);
     }
 
-    private getGravityY(x: number): number {
+    private getGravityPos(pos: Vec2): Vec2 {
         if (this.maxY === undefined) {
-            return NaN;
+            return [NaN, NaN];
         }
-        for (let i = this.maxY - 1; i >= (this.minY ?? -Infinity); i--) {
-            if (!this.hasCell(x, i)) {
-                return i;
+
+        let [x, y] = pos;
+
+        switch (this.gridType) {
+            case "triangle": {
+                x += Math.floor((y + 1) / 4);
+                y = Math.floor((y + 1) % 4 / 2);
+                const min = this.minY; // TODO: Fix when minY < 0
+                const max = Math.min(x * 2 + y, Math.floor(this.maxY / 2) - 1)
+                for (let i = max; i >= min; i--) {
+                    if (y) {
+                        const test: Vec2 = [x - Math.ceil((i - 1) / 2) , y + i * 2 - i % 2];
+                        if (!this.hasCell(...test)) {
+                            return test;
+                        }
+                    } else {
+                        const test: Vec2 = [x - Math.ceil(i / 2) , y + i * 2 + i % 2];
+                        if (!this.hasCell(...test)) {
+                            return test;
+                        }
+                    }
+                }
+                break;
+            }
+
+            default: {
+                for (let i = this.maxY - 1; i >= (this.minY ?? -Infinity); i--) {
+                    if (!this.hasCell(x, i)) {
+                        return [x, i];
+                    }
+                }
             }
         }
-        return Infinity;
+
+        return [x, Infinity];
     }
 
     public withinBounds(x: number, y: number): boolean {
@@ -89,11 +118,8 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         if (color < 0 || color > PlayerColor.Pink) {
             return `Color must be between 0 and ${PlayerColor.Pink}`;
         }
-        if (!this.withinBounds(x, y)) {
-            return "Cell out of bounds.";
-        }
         if (this.gravity) {
-            y = this.getGravityY(x);
+            [x, y] = this.getGravityPos([x, y]);
 
             if (y === Infinity) {
                 return "Cell out of bounds.";
@@ -102,6 +128,9 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             if (isNaN(y)) { // For fun, pretend that it passes, but don't actually do anything.
                 return false;
             }
+        }
+        if (!this.withinBounds(x, y)) {
+            return "Cell out of bounds.";
         }
         if (this.hasCell(x, y)) {
             return "Cell already set";

@@ -7,6 +7,12 @@ const rooms: Map<string, ServerRoom> = new Map();
 
 const refs: SocketReferences = new SocketReferences();
 
+function zeroWidthTrim(stringToTrim: string) {
+    const ZERO_WIDTH_SPACES_REGEX = /([\u200B]+|[\u200C]+|[\u200D]+|[\u200E]+|[\u200F]+|[\uFEFF]+)/g;
+    const trimmedString = stringToTrim.replace(ZERO_WIDTH_SPACES_REGEX, '');
+    return trimmedString;
+}
+
 export default function socket(server?: any) {
     const io = new Server(server, {
         allowEIO3: true,
@@ -28,7 +34,7 @@ export default function socket(server?: any) {
         });
 
         onPacket(socket, 'join', (...packet) => {
-            const username = packet[1];
+            const username = zeroWidthTrim(packet[1].trim());
             const roomName = packet[2];
 
             if (username.length > 64) {
@@ -42,7 +48,14 @@ export default function socket(server?: any) {
             }
             
             if (rooms.has(roomName)) {
-                rooms.get(roomName)?.open(socket, packet);
+                const room = rooms.get(roomName)!;
+
+                if (room.playerNames.findIndex((s) => s === username) >= 0) {
+                    emitPacket(socket, "joinReject", "Name exists.");
+                    return
+                }
+
+                room.open(socket, packet);
             } else {
                 emitPacket(socket, "joinReject", "Game not found.");
             }

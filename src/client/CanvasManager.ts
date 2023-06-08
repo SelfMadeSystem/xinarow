@@ -531,6 +531,28 @@ export function drawBoard(board: Board) {
                 break;
         }
     }
+    // for (let x = board.minX; x < board.maxX; x++) {
+    //     for (let y = board.minY; y < board.maxY; y++) {
+    //         let x1 = x;
+    //         let y1 = y;
+    //         const ymod = mod(y, 2);
+    //         [x1, y1] = cartesianToHex(x, Math.floor(y / 2) + ymod);
+            
+    //         let [x2, y2] = [x1 + 0.5, y1 +
+    //             (ymod === 0 ? 1 : -1) * HALF_SQRT_3];
+    //         let [x3, y3] = [x1 + 1, y1];
+
+    //         ctx.fillStyle = 'white';
+
+    //         [x1, y1] = toDrawPoint(x1, y1);
+    //         [x2, y2] = toDrawPoint(x2, y2);
+    //         [x3, y3] = toDrawPoint(x3, y3);
+
+    //         ctx.textAlign = "center";
+            
+    //         ctx.fillText(`(${x}, ${y})`, (x1 + x2 + x3) / 3, (y1 + y2 + y3) / 3);
+    //     }
+    // }
 }
 
 export function drawWinningLines(board: Board, winningLines: Vec2[][]) {

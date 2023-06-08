@@ -138,3 +138,34 @@ canvas {
     display: none;
   }
 }
+
+#chat-input-hide {
+  display: none;
+}
+
+#chat-input-hide-label {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.5em;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+#chat-show {
+  position: absolute;
+  display: none;
+  bottom: 0;
+  right: 0;
+  padding: 0.5em;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+#chat-input-hide:checked + #chat-show {
+  display: block;
+}
+
+#chat-input-hide:checked + #chat-show + #chat {
+  display: none;
+}

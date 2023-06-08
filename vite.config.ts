@@ -10,7 +10,7 @@ export default defineConfig({
     base: '',
     
     server: {
-        port: 3000,
+        port: 3001,
         https: false,
         proxy: {
             '/socket.io': {
