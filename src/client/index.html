@@ -33,7 +33,7 @@
         <label for="chat-input-hide" id="chat-input-hide-label">x</label>
       </div>
       <div id="main-menu">
-        <div id="join-game">
+        <div id="join-game" style="display: none;">
           <h1>Join game</h1>
           <label>
             Room name:
@@ -43,10 +43,11 @@
         </div>
         <div id="create-game">
           <h1>Create game</h1>
-          <label>
+          <label style="display: none;">
             Room name:
             <input type="text" id="create-name" value="" />
-          </label><br />
+          </label>
+          <!-- <br /> -->
           <label id="presets">
             Presets:
             <select id="presets-select">
@@ -131,10 +132,10 @@
             Density Percentage (instead of count):
             <input type="checkbox" id="create-density-percent" />
           </label>
-          <br />
-          <label>
+          <!-- <br /> -->
+          <label style="display: none;">
             Online:
-            <input checked type="checkbox" id="create-online" />
+            <input type="checkbox" id="create-online" />
           </label>
           <br />
           <button id="create-button">Create</button>
