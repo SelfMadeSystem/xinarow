@@ -17,7 +17,7 @@ const chatOverlay = document.getElementById('chat')! as HTMLDivElement;
 const statusOverlay = document.getElementById('turn')! as HTMLDivElement;
 const timeOverlay = document.getElementById('time')! as HTMLDivElement;
 
-export function setTurnText(turn: number, myTurn: number, { teamSize, playerTurns } : RoomOptions, names?: string[]) {
+export function setTurnText(turn: number, myTurn: number, { teamSize, playerTurns }: RoomOptions, names?: string[]) {
     const color = colorName(Math.floor(turn / teamSize / playerTurns));
     const Color = capitalizeFirst(color);
     if (Math.floor(turn / playerTurns) === myTurn) {
@@ -106,7 +106,7 @@ const joinName = document.getElementById('join-name')! as HTMLInputElement;
 function ingameOverlay(online = true) {
     mainMenuOverlay.style.display = 'none';
     statusOverlay.style.visibility = 'visible';
-    if (online || true)
+    if (online)
         chatOverlay.style.visibility = 'visible';
 }
 
