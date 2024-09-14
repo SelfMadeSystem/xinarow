@@ -28,10 +28,29 @@ label {
 #overlay {
   position: absolute;
   pointer-events: none;
+  align-content: center;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+}
+
+#main-menu {
+  padding: 1rem;
+  width: max-content;
+  margin: auto;
+  border: 2px solid white;
+  border-radius: 1rem;
+  background: #2a2a2aaa;
+  backdrop-filter: blur(1rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#games {
+  display: flex;
+  flex-direction: row;
 }
 
 #join-game {
@@ -42,14 +61,42 @@ label {
   pointer-events: all;
 }
 
+input[type="text"],
+input[type="number"],
+select {
+  background: #0004;
+  color: white;
+  border: 1px solid #fff;
+  border-radius: 0.25rem;
+  padding: 0.25rem;
+  margin: 0 0.5rem;
+}
+
+option {
+  background: #000;
+  color: white;
+}
+
+button {
+  background: #0004;
+  color: white;
+  border: 1px solid #fff;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.25s;
+
+  &:hover {
+    background: #000;
+  }
+}
+
+#chat-input-button {
+  padding: 0.5rem;
+}
+
 #username {
-  pointer-events: all;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 1em;
-  margin: auto;
-  width: fit-content;
+  margin-bottom: 0.5rem;
 }
 
 #loading {
@@ -173,3 +220,39 @@ label {
 #chat-input-hide:checked + #chat-show + #chat {
   display: none;
 }
+
+h1 {
+  margin-top: 0;
+}
+
+.checkbox-container {
+  cursor: pointer;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.checkbox-container input {
+  display: none;
+}
+
+.checkbox-container svg {
+  overflow: visible;
+  margin: auto;
+}
+
+.checkbox-container .path {
+  fill: none;
+  stroke: white;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-dasharray 0.5s ease, stroke-dashoffset 0.5s ease;
+  stroke-dasharray: 241 9999999;
+  stroke-dashoffset: 0;
+}
+
+.checkbox-container  input:checked ~ svg .path {
+  stroke-dasharray: 70.5096664428711 9999999;
+  stroke-dashoffset: -262.2723388671875;
+}
+

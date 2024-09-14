@@ -8,7 +8,7 @@ import { OfflineClientRoom } from "./OfflineClientRoom";
 import { GridType, RoomOptions, TeamOrder } from "../share/Protocol";
 import { setUsername, getUsername } from "./GameHandler";
 
-const multiplayerSupport = import.meta.env.MULIPLAYER === "true";
+const multiplayerSupport = import.meta.env.VITE_MULTIPLAYER === "true";
 const mainMenuOverlay = document.getElementById("main-menu")! as HTMLDivElement;
 const loadingOverlay = document.getElementById("loading")! as HTMLDivElement;
 const chatOverlay = document.getElementById("chat")! as HTMLDivElement;
@@ -400,7 +400,8 @@ presetsSelect.addEventListener("change", () => {
 document.addEventListener("DOMContentLoaded", () => {
     if (!multiplayerSupport) {
         // Hide elements that are only for online mode
-        const elementsToHide = document.querySelectorAll<HTMLElement>(".online-only");
+        const elementsToHide =
+            document.querySelectorAll<HTMLElement>(".online-only");
 
         elementsToHide.forEach((element) => {
             if (element) {

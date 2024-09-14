@@ -31,7 +31,7 @@ it on your local network (more than just localhost, i.e. 192.168.0.20 if your
 local ip is that).
 
 If you want to enable multiplayer mode, you must host the server and set the
-`MULIPLAYER` environment variable to `true`.
+`VITE_MULTIPLAYER` environment variable to `true`.
 
 ## Contributing
 

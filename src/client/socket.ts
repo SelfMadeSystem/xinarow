@@ -10,7 +10,7 @@ import {
 
 export const uid = v4();
 
-const multiplayerSupport = import.meta.env.MULIPLAYER === "true";
+const multiplayerSupport = import.meta.env.VITE_MULTIPLAYER === "true";
 
 const listeners = new Map<ServerPacketNames, Function[]>();
 

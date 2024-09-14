@@ -1,22 +1,27 @@
-import { defineConfig } from 'vite'
-import socket from './src/server/socket'
+import { defineConfig } from "vite";
+import socket from "./src/server/socket";
 
-const port = Math.floor(Math.random() * 1000) + 3000
+const multiplayerSupport = process.env.VITE_MULTIPLAYER === "true";
+
+const port = Math.floor(Math.random() * 1000) + 3000;
 
 export default defineConfig({
     root: "src/client/",
-    base: '',
-    
+    base: "",
+
     server: {
         port: 3001,
-        https: false,
-        // proxy: {
-        //     '/socket.io': {
-        //         target: `ws://localhost:${port}`,
-        //         changeOrigin: true,
-        //         ws: true,
-        //     },
-        // },
+        ...(multiplayerSupport
+            ? {
+                  proxy: {
+                      "/socket.io": {
+                          target: `ws://localhost:${port}`,
+                          changeOrigin: true,
+                          ws: true,
+                      },
+                  },
+              }
+            : {}),
     },
     build: {
         outDir: "../../dist/",
@@ -25,17 +30,19 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            '@': '/src/client',
-            '@server': '/src/server',
+            "@": "/src/client",
+            "@server": "/src/server",
         },
     },
     optimizeDeps: {
-        include: ['socket.io-client'],
+        include: ["socket.io-client"],
     },
     define: {
-        'process.env': {},
+        "process.env": {},
     },
-    appType: 'spa',
-})
+    appType: "spa",
+});
 
-// socket(port)
+if (multiplayerSupport) {
+    socket(port);
+}
