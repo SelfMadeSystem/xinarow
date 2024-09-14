@@ -33,7 +33,7 @@
         <label for="chat-input-hide" id="chat-input-hide-label">x</label>
       </div>
       <div id="main-menu">
-        <div id="join-game" style="display: none;">
+        <div id="join-game" class="online-only">
           <h1>Join game</h1>
           <label>
             Room name:
@@ -43,11 +43,10 @@
         </div>
         <div id="create-game">
           <h1>Create game</h1>
-          <label style="display: none;">
+          <label class="online-only">
             Room name:
             <input type="text" id="create-name" value="" />
           </label>
-          <!-- <br /> -->
           <label id="presets">
             Presets:
             <select id="presets-select">
@@ -65,12 +64,10 @@
               <option value="infinitetriangle">Infinite Triangle</option>
             </select>
           </label>
-          <br />
           <label>
             Gravity:
             <input type="checkbox" id="create-gravity" />
           </label>
-          <br />
           <label>
             Grid Type:
             <select id="create-grid-type">
@@ -79,27 +76,22 @@
               <option value="triangle">Triangle</option>
             </select>
           </label>
-          <br />
           <label>
             N In A Row:
             <input type="number" id="create-n-in-a-row" value="5" min="1" step="1" />
           </label>
-          <br />
           <label>
             Team Count:
             <input type="number" id="create-team-count" value="2" min="1" max="8" step="1" />
           </label>
-          <br />
           <label>
             Team Size:
             <input type="number" id="create-team-size" value="1" min="1" max="8" step="1" />
           </label>
-          <br />
           <label>
             Turns Per Player:
             <input type="number" id="create-player-turns" value="1" min="1" max="8" step="1" />
           </label>
-          <br />
           <label>
             Team Order:
             <select id="create-team-order">
@@ -107,40 +99,33 @@
               <option value="join">Join Order</option>
             </select>
           </label>
-          <br />
           <label>
             Width:
             <input type="number" id="create-width" value="15" min="1" step="1" />
           </label>
-          <br />
           <label>
             Height:
             <input type="number" id="create-height" value="15" min="1" step="1" />
           </label>
-          <br />
           <label>
             Expand Length:
             <input type="number" id="create-expand-length" value="0" min="0" step="1" />
           </label>
-          <br />
           <label>
             Expand Density:
             <input type="number" id="create-expand-density" value="0" min="0" max="100" step="1" />
           </label>
-          <br />
           <label>
             Density Percentage (instead of count):
             <input type="checkbox" id="create-density-percent" />
           </label>
-          <!-- <br /> -->
-          <label style="display: none;">
+          <label class="online-only">
             Online:
             <input type="checkbox" id="create-online" />
           </label>
-          <br />
           <button id="create-button">Create</button>
         </div>
-        <div id="username" style="display: none;">
+        <div class="online-only" id="username">
           <label>
             Username:
             <input type="text" id="username-input" value="" />

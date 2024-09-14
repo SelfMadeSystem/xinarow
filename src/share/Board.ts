@@ -17,10 +17,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
     public densityPercent: boolean = false;
     public readonly gridType: GridType = "square";
 
-
-    constructor(
-        options: RoomOptions
-    ) {
+    constructor(options: RoomOptions) {
         this.nInARow = options.nInARow;
         this.gravity = options.gravity;
         this.maxX = options.width;
@@ -31,11 +28,13 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         this.gridType = options.gridType;
     }
 
-    private tAI(n: number) { // To Array Index
+    private tAI(n: number) {
+        // To Array Index
         return toNaturalNumber(n);
     }
 
-    private fAI(n: number) { // From Array Index
+    private fAI(n: number) {
+        // From Array Index
         return fromNaturalNumber(n);
     }
 
@@ -49,17 +48,23 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         switch (this.gridType) {
             case "triangle": {
                 x += Math.floor((y + 1) / 4);
-                y = Math.floor((y + 1) % 4 / 2);
+                y = Math.floor(((y + 1) % 4) / 2);
                 const min = this.minY; // TODO: Fix when minY < 0
-                const max = Math.min(x * 2 + y, Math.floor(this.maxY / 2) - 1)
+                const max = Math.min(x * 2 + y, Math.floor(this.maxY / 2) - 1);
                 for (let i = max; i >= min; i--) {
                     if (y) {
-                        const test: Vec2 = [x - Math.ceil((i - 1) / 2) , y + i * 2 - i % 2];
+                        const test: Vec2 = [
+                            x - Math.ceil((i - 1) / 2),
+                            y + i * 2 - (i % 2),
+                        ];
                         if (!this.hasCell(...test)) {
                             return test;
                         }
                     } else {
-                        const test: Vec2 = [x - Math.ceil(i / 2) , y + i * 2 + i % 2];
+                        const test: Vec2 = [
+                            x - Math.ceil(i / 2),
+                            y + i * 2 + (i % 2),
+                        ];
                         if (!this.hasCell(...test)) {
                             return test;
                         }
@@ -69,7 +74,11 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             }
 
             default: {
-                for (let i = this.maxY - 1; i >= (this.minY ?? -Infinity); i--) {
+                for (
+                    let i = this.maxY - 1;
+                    i >= (this.minY ?? -Infinity);
+                    i--
+                ) {
                     if (!this.hasCell(x, i)) {
                         return [x, i];
                     }
@@ -125,7 +134,8 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 return "Cell out of bounds.";
             }
 
-            if (isNaN(y)) { // For fun, pretend that it passes, but don't actually do anything.
+            if (isNaN(y)) {
+                // For fun, pretend that it passes, but don't actually do anything.
                 return false;
             }
         }
@@ -148,9 +158,14 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 if (x < this.minX + this.expandLength) {
                     this.minX = x - this.expandLength;
                 }
-                if (y < this.minY + this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
+                if (
+                    y <
+                    this.minY +
+                        this.expandLength *
+                            (this.gridType === "triangle" ? 2 : 1)
+                ) {
                     this.minY = y - this.expandLength;
-                    if (this.gridType === 'triangle') {
+                    if (this.gridType === "triangle") {
                         this.minY -= this.expandLength;
                         this.minY = Math.floor(this.minY / 2) * 2;
                     }
@@ -159,18 +174,30 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 if (x >= this.maxX - this.expandLength) {
                     this.maxX = x + this.expandLength + 1;
                 }
-                if (!this.gravity && y >= this.maxY - this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
+                if (
+                    !this.gravity &&
+                    y >=
+                        this.maxY -
+                            this.expandLength *
+                                (this.gridType === "triangle" ? 2 : 1)
+                ) {
                     this.maxY = y + this.expandLength + 1;
-                    if (this.gridType === 'triangle') {
+                    if (this.gridType === "triangle") {
                         this.maxY += this.expandLength + 1;
                         this.maxY = Math.floor(this.maxY / 2) * 2;
                     }
                 }
             } else {
-                const isDenseEnough = (x1: number, y1: number, x2: number, y2: number) => {
+                const isDenseEnough = (
+                    x1: number,
+                    y1: number,
+                    x2: number,
+                    y2: number
+                ) => {
                     let count = 0;
 
-                    for (let x = x1; x < x2; x++) { // x2 and y2 are exclusive
+                    for (let x = x1; x < x2; x++) {
+                        // x2 and y2 are exclusive
                         for (let y = y1; y < y2; y++) {
                             if (this.hasCell(x, y)) {
                                 count++;
@@ -179,7 +206,10 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                     }
 
                     if (this.densityPercent) {
-                        return 100 * count >= this.expandDensity * (x2 - x1) * (y2 - y1);
+                        return (
+                            100 * count >=
+                            this.expandDensity * (x2 - x1) * (y2 - y1)
+                        );
                     }
                     return count >= this.expandDensity;
                 };
@@ -189,39 +219,86 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 const cbs: (() => void)[] = [];
 
                 if (x < this.minX + this.expandLength) {
-                    if (isDenseEnough(this.minX, this.minY, this.minX + this.expandLength, this.maxY)) {
+                    if (
+                        isDenseEnough(
+                            this.minX,
+                            this.minY,
+                            this.minX + this.expandLength,
+                            this.maxY
+                        )
+                    ) {
                         cbs.push(() => {
                             this.minX -= this.expandLength;
                         });
                     }
                 }
 
-                if (y < this.minY + this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
-                    if (isDenseEnough(this.minX, this.minY, this.maxX, this.minY + this.expandLength * (this.gridType === 'triangle' ? 2 : 1))) {
+                if (
+                    y <
+                    this.minY +
+                        this.expandLength *
+                            (this.gridType === "triangle" ? 2 : 1)
+                ) {
+                    if (
+                        isDenseEnough(
+                            this.minX,
+                            this.minY,
+                            this.maxX,
+                            this.minY +
+                                this.expandLength *
+                                    (this.gridType === "triangle" ? 2 : 1)
+                        )
+                    ) {
                         cbs.push(() => {
-                            this.minY -= this.expandLength * (this.gridType === 'triangle' ? 2 : 1);
+                            this.minY -=
+                                this.expandLength *
+                                (this.gridType === "triangle" ? 2 : 1);
                         });
                     }
                 }
 
                 if (x >= this.maxX - this.expandLength) {
-                    if (isDenseEnough(this.maxX - this.expandLength, this.minY, this.maxX, this.maxY)) {
+                    if (
+                        isDenseEnough(
+                            this.maxX - this.expandLength,
+                            this.minY,
+                            this.maxX,
+                            this.maxY
+                        )
+                    ) {
                         cbs.push(() => {
                             this.maxX += this.expandLength;
                         });
                     }
                 }
 
-                if (!this.gravity && y >= this.maxY - this.expandLength * (this.gridType === 'triangle' ? 2 : 1)) {
-                    if (isDenseEnough(this.minX, this.maxY - this.expandLength * (this.gridType === 'triangle' ? 2 : 1), this.maxX, this.maxY)) {
+                if (
+                    !this.gravity &&
+                    y >=
+                        this.maxY -
+                            this.expandLength *
+                                (this.gridType === "triangle" ? 2 : 1)
+                ) {
+                    if (
+                        isDenseEnough(
+                            this.minX,
+                            this.maxY -
+                                this.expandLength *
+                                    (this.gridType === "triangle" ? 2 : 1),
+                            this.maxX,
+                            this.maxY
+                        )
+                    ) {
                         cbs.push(() => {
-                            this.maxY += this.expandLength * (this.gridType === 'triangle' ? 2 : 1);
+                            this.maxY +=
+                                this.expandLength *
+                                (this.gridType === "triangle" ? 2 : 1);
                         });
                     }
                 }
 
-                cbs.forEach(cb => cb());
-            };
+                cbs.forEach((cb) => cb());
+            }
         }
     }
 
@@ -261,47 +338,69 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
     public testWin(x: number, y: number, color: PlayerColor): boolean {
         // We want to test all directions and not just the first one that returns true
         switch (this.gridType) {
-            case 'square': {
+            case "square": {
                 let result1 = this.testWinHorizontal(x, y, color);
                 let result2 = this.testWinVertical(x, y, color);
                 let result3 = this.testWinDiagonal(x, y, color);
                 return result1 || result2 || result3;
             }
-            case 'hex': {
+            case "hex": {
                 let result1 = this.testWinHorizontal(x, y, color);
                 let result2 = this.testWinVertical(x, y, color);
                 let result3 = this.testWinDiagonalUphill(x, y, color);
                 return result1 || result2 || result3;
             }
-            case 'triangle':
+            case "triangle":
                 let result1 = this.testWinHorizontalTriangle(x, y, color);
                 let result2 = this.testWinVertical(x, y, color);
                 let result3 = this.testWinVerticalTriangle(x, y, color);
                 let result4 = this.testWinDiagonalUphill(x, y, color);
                 let result5 = this.testWinDiagonalTriangleUpDown(x, y, color);
                 let result6 = this.testWinDiagonalTriangleDownhill(x, y, color);
-                return result1 || result2 || result3 || result4 || result5 || result6;
+                return (
+                    result1 ||
+                    result2 ||
+                    result3 ||
+                    result4 ||
+                    result5 ||
+                    result6
+                );
             default:
                 throw new Error("Unknown grid type.");
         }
     }
 
-    public testWinHorizontal(x: number, y: number, color: PlayerColor): boolean {
+    public testWinHorizontal(
+        x: number,
+        y: number,
+        color: PlayerColor
+    ): boolean {
         let count = 1;
         let minX: number = x;
         let maxX: number = x;
         let i = 1;
-        for (let cell = this.getCell(x - i, y); cell === color; cell = this.getCell(x - ++i, y)) {
+        for (
+            let cell = this.getCell(x - i, y);
+            cell === color;
+            cell = this.getCell(x - ++i, y)
+        ) {
             count++;
             minX = x - i;
         }
         i = 1;
-        for (let cell = this.getCell(x + i, y); cell === color; cell = this.getCell(x + ++i, y)) {
+        for (
+            let cell = this.getCell(x + i, y);
+            cell === color;
+            cell = this.getCell(x + ++i, y)
+        ) {
             count++;
             maxX = x + i;
         }
         if (count >= this.nInARow) {
-            this.winningLines.push([[minX, y], [maxX, y]]);
+            this.winningLines.push([
+                [minX, y],
+                [maxX, y],
+            ]);
             return true;
         }
         return false;
@@ -312,17 +411,28 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         let minY: number = y;
         let maxY: number = y;
         let i = 1;
-        for (let cell = this.getCell(x, y - i); cell === color; cell = this.getCell(x, y - ++i)) {
+        for (
+            let cell = this.getCell(x, y - i);
+            cell === color;
+            cell = this.getCell(x, y - ++i)
+        ) {
             count++;
             minY = y - i;
         }
         i = 1;
-        for (let cell = this.getCell(x, y + i); cell === color; cell = this.getCell(x, y + ++i)) {
+        for (
+            let cell = this.getCell(x, y + i);
+            cell === color;
+            cell = this.getCell(x, y + ++i)
+        ) {
             count++;
             maxY = y + i;
         }
         if (count >= this.nInARow) {
-            this.winningLines.push([[x, minY], [x, maxY]]);
+            this.winningLines.push([
+                [x, minY],
+                [x, maxY],
+            ]);
             return true;
         }
         return false;
@@ -334,57 +444,91 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         return result1 || result2;
     }
 
-    public testWinDiagonalDownhill(x: number, y: number, color: PlayerColor): boolean {
+    public testWinDiagonalDownhill(
+        x: number,
+        y: number,
+        color: PlayerColor
+    ): boolean {
         let count = 1;
         let x1: number = x;
         let x2: number = x;
         let y1: number = y;
         let y2: number = y;
         let i = 1;
-        for (let cell = this.getCell(x - i, y - i); cell === color; cell = this.getCell(x - ++i, y - i)) {
+        for (
+            let cell = this.getCell(x - i, y - i);
+            cell === color;
+            cell = this.getCell(x - ++i, y - i)
+        ) {
             count++;
             x1 = x - i;
             y1 = y - i;
         }
         i = 1;
-        for (let cell = this.getCell(x + i, y + i); cell === color; cell = this.getCell(x + ++i, y + i)) {
+        for (
+            let cell = this.getCell(x + i, y + i);
+            cell === color;
+            cell = this.getCell(x + ++i, y + i)
+        ) {
             count++;
             x2 = x + i;
             y2 = y + i;
         }
         if (count >= this.nInARow) {
-            this.winningLines.push([[x1, y1], [x2, y2]]);
+            this.winningLines.push([
+                [x1, y1],
+                [x2, y2],
+            ]);
             return true;
         }
         return false;
     }
 
-    public testWinDiagonalUphill(x: number, y: number, color: PlayerColor): boolean {
+    public testWinDiagonalUphill(
+        x: number,
+        y: number,
+        color: PlayerColor
+    ): boolean {
         let count = 1;
         let x1: number = x;
         let x2: number = x;
         let y1: number = y;
         let y2: number = y;
         let i = 1;
-        for (let cell = this.getCell(x - i, y + i); cell === color; cell = this.getCell(x - ++i, y + i)) {
+        for (
+            let cell = this.getCell(x - i, y + i);
+            cell === color;
+            cell = this.getCell(x - ++i, y + i)
+        ) {
             count++;
             x1 = x - i;
             y1 = y + i;
         }
         i = 1;
-        for (let cell = this.getCell(x + i, y - i); cell === color; cell = this.getCell(x + ++i, y - i)) {
+        for (
+            let cell = this.getCell(x + i, y - i);
+            cell === color;
+            cell = this.getCell(x + ++i, y - i)
+        ) {
             count++;
             x2 = x + i;
             y2 = y - i;
         }
         if (count >= this.nInARow) {
-            this.winningLines.push([[x1, y1], [x2, y2]]);
+            this.winningLines.push([
+                [x1, y1],
+                [x2, y2],
+            ]);
             return true;
         }
         return false;
     }
 
-    public testWinHorizontalTriangle(x: number, y: number, color: PlayerColor): boolean {
+    public testWinHorizontalTriangle(
+        x: number,
+        y: number,
+        color: PlayerColor
+    ): boolean {
         let count = 1;
         let startX = x;
         let endX = x;
@@ -392,42 +536,67 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         let endY = y;
         let i = 1;
         if (mod(y, 2) === 0) {
-            for (let cell = this.getCell(x - Math.floor((i + 1) / 2), y + i % 2); cell === color;
-                cell = this.getCell(x - Math.floor((++i + 1) / 2), y + i % 2)) {
+            for (
+                let cell = this.getCell(
+                    x - Math.floor((i + 1) / 2),
+                    y + (i % 2)
+                );
+                cell === color;
+                cell = this.getCell(x - Math.floor((++i + 1) / 2), y + (i % 2))
+            ) {
                 count++;
                 startX = x - Math.floor((i + 1) / 2);
-                startY = y + i % 2;
+                startY = y + (i % 2);
             }
             i = 1;
-            for (let cell = this.getCell(x + Math.floor(i / 2), y + i % 2); cell === color;
-                cell = this.getCell(x + Math.floor(++i / 2), y + i % 2)) {
+            for (
+                let cell = this.getCell(x + Math.floor(i / 2), y + (i % 2));
+                cell === color;
+                cell = this.getCell(x + Math.floor(++i / 2), y + (i % 2))
+            ) {
                 count++;
                 endX = x + Math.floor(i / 2);
-                endY = y + i % 2;
+                endY = y + (i % 2);
             }
         } else {
-            for (let cell = this.getCell(x - Math.floor(i / 2), y - i % 2); cell === color;
-                cell = this.getCell(x - Math.floor(++i / 2), y - i % 2)) {
+            for (
+                let cell = this.getCell(x - Math.floor(i / 2), y - (i % 2));
+                cell === color;
+                cell = this.getCell(x - Math.floor(++i / 2), y - (i % 2))
+            ) {
                 count++;
                 startX = x - Math.floor(i / 2);
-                startY = y - i % 2;
+                startY = y - (i % 2);
             }
             i = 1;
-            for (let cell = this.getCell(x + Math.floor((i + 1) / 2), y - i % 2); cell === color;
-                cell = this.getCell(x + Math.floor((++i + 1) / 2), y - i % 2)) {
+            for (
+                let cell = this.getCell(
+                    x + Math.floor((i + 1) / 2),
+                    y - (i % 2)
+                );
+                cell === color;
+                cell = this.getCell(x + Math.floor((++i + 1) / 2), y - (i % 2))
+            ) {
                 count++;
                 endX = x + Math.floor((i + 1) / 2);
-                endY = y - i % 2;
+                endY = y - (i % 2);
             }
         }
         if (count >= this.nInARow) {
-            this.winningLines.push([[startX, startY], [endX, endY]]);
+            this.winningLines.push([
+                [startX, startY],
+                [endX, endY],
+            ]);
             return true;
         }
         return false;
     }
 
-    public testWinVerticalTriangle(x: number, y: number, color: PlayerColor): boolean {
+    public testWinVerticalTriangle(
+        x: number,
+        y: number,
+        color: PlayerColor
+    ): boolean {
         let count = 1;
         let min: Vec2 = [x, y];
         let max: Vec2 = [x, y];
@@ -441,12 +610,20 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             }
         };
 
-        for (let cell = this.getCell(...getPos(-i)); cell === color; cell = this.getCell(...getPos(-++i))) {
+        for (
+            let cell = this.getCell(...getPos(-i));
+            cell === color;
+            cell = this.getCell(...getPos(-++i))
+        ) {
             count++;
             min = getPos(-i);
         }
         i = 1;
-        for (let cell = this.getCell(...getPos(i)); cell === color; cell = this.getCell(...getPos(++i))) {
+        for (
+            let cell = this.getCell(...getPos(i));
+            cell === color;
+            cell = this.getCell(...getPos(++i))
+        ) {
             count++;
             max = getPos(i);
         }
@@ -457,7 +634,11 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         return false;
     }
 
-    public testWinDiagonalTriangleUpDown(x: number, y: number, color: PlayerColor): boolean {
+    public testWinDiagonalTriangleUpDown(
+        x: number,
+        y: number,
+        color: PlayerColor
+    ): boolean {
         let count = 1;
         let min: Vec2 = [x, y];
         let max: Vec2 = [x, y];
@@ -467,16 +648,27 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             if (mod(y, 2) === 0) {
                 return [x + Math.floor(i / 2), y - i - Math.floor(i / 2) * 2];
             } else {
-                return [x + Math.floor((i + 1) / 2), y - i - Math.floor((i + 1) / 2) * 2];
+                return [
+                    x + Math.floor((i + 1) / 2),
+                    y - i - Math.floor((i + 1) / 2) * 2,
+                ];
             }
         };
 
-        for (let cell = this.getCell(...getPos(-i)); cell === color; cell = this.getCell(...getPos(-++i))) {
+        for (
+            let cell = this.getCell(...getPos(-i));
+            cell === color;
+            cell = this.getCell(...getPos(-++i))
+        ) {
             count++;
             min = getPos(-i);
         }
         i = 1;
-        for (let cell = this.getCell(...getPos(i)); cell === color; cell = this.getCell(...getPos(++i))) {
+        for (
+            let cell = this.getCell(...getPos(i));
+            cell === color;
+            cell = this.getCell(...getPos(++i))
+        ) {
             count++;
             max = getPos(i);
         }
@@ -487,7 +679,11 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         return false;
     }
 
-    public testWinDiagonalTriangleDownhill(x: number, y: number, color: PlayerColor): boolean {
+    public testWinDiagonalTriangleDownhill(
+        x: number,
+        y: number,
+        color: PlayerColor
+    ): boolean {
         let count = 1;
         let min: Vec2 = [x, y];
         let max: Vec2 = [x, y];
@@ -501,12 +697,20 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             }
         };
 
-        for (let cell = this.getCell(...getPos(-i)); cell === color; cell = this.getCell(...getPos(-++i))) {
+        for (
+            let cell = this.getCell(...getPos(-i));
+            cell === color;
+            cell = this.getCell(...getPos(-++i))
+        ) {
             count++;
             min = getPos(-i);
         }
         i = 1;
-        for (let cell = this.getCell(...getPos(i)); cell === color; cell = this.getCell(...getPos(++i))) {
+        for (
+            let cell = this.getCell(...getPos(i));
+            cell === color;
+            cell = this.getCell(...getPos(++i))
+        ) {
             count++;
             max = getPos(i);
         }
@@ -521,7 +725,9 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         let i = 0;
         let j = 0;
 
-        const next: () => IteratorResult<[number, number, PlayerColor]> = () => {
+        const next: () => IteratorResult<
+            [number, number, PlayerColor]
+        > = () => {
             const x = this.fAI(i);
             const y = this.fAI(j);
             const cell = this._getCell(i, j);
@@ -545,12 +751,15 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             return next();
         };
         return {
-            next
+            next,
         };
     }
 
-
-    [Symbol.iterator](): Iterator<[number, number, PlayerColor], any, undefined> {
+    [Symbol.iterator](): Iterator<
+        [number, number, PlayerColor],
+        any,
+        undefined
+    > {
         return this.iterate();
     }
 }

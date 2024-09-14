@@ -7,6 +7,7 @@ a row (either orthogonally or diagonally).
 ## Features
 
 Currently, the game supports:
+
 - 1 to 8 teams
 - 1 to 8 players per team
 - any grid size
@@ -29,6 +30,9 @@ may add the `--host` argument to either the `dev` or `preview` command to host
 it on your local network (more than just localhost, i.e. 192.168.0.20 if your
 local ip is that).
 
+If you want to enable multiplayer mode, you must host the server and set the
+`MULIPLAYER` environment variable to `true`.
+
 ## Contributing
 
 If you want to contribute, please open a pull request on the GitHub repository.
@@ -49,11 +53,12 @@ want to contact me, my discord is `SelfMadeSystem#3808`.
 
 This project is licensed under the GNU Affero General Public License v3.0. The
 terms and conditions essentially boil down to this (this is not legal advice):
+
 - You may use it any way you like
 - You may modify it under these conditions:
-    - Your modified copy must have the same license
-    - You must state the changes made
-    - You must disclose the source code of your project
+  - Your modified copy must have the same license
+  - You must state the changes made
+  - You must disclose the source code of your project
 
 USE AT YOUR OWN RISK. I AM NOT RESPONSIBLE FOR ANYTHING THAT HAPPENS TO YOU OR
 YOUR COMPUTER.

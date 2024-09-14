@@ -21,6 +21,10 @@ canvas {
   height: 100%;
 }
 
+label {
+  display: block;
+}
+
 #overlay {
   position: absolute;
   pointer-events: none;

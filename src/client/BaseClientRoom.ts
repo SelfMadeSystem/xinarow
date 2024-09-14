@@ -1,7 +1,7 @@
 import { PlayerColor } from "../share/PlayerColor";
 import { Board } from "../share/Board";
 import * as CanvasManager from "./CanvasManager";
-import { mod, Vec2 } from '../share/Utils';
+import { mod, Vec2 } from "../share/Utils";
 import { setStatusText, setTimeText, setTurnText } from "./main";
 import { RoomOptions } from "../share/Protocol";
 
@@ -14,23 +14,25 @@ export abstract class BaseClientRoom {
     public turn: number = 0;
     public myTurn: number = -1;
     public ended: boolean = false;
-    public closeCb: () => void = () => { };
-    public placedThingCb: () => void = () => { };
-    public serverPlacedThingCb: (result: string | boolean) => void = () => { };
+    public closeCb: () => void = () => {};
+    public placedThingCb: () => void = () => {};
+    public serverPlacedThingCb: (result: string | boolean) => void = () => {};
     private onTapBinding: (v: Vec2) => void;
     private onRefreshBinding: (v: Vec2) => void;
     public startTime: number = Date.now();
 
     constructor(
         public readonly roomName: string,
-        public readonly options: RoomOptions,
+        public readonly options: RoomOptions
     ) {
         this.board = new Board(options);
 
         requestAnimationFrame(this.draw.bind(this));
 
-        CanvasManager.onCanvasTap(this.onTapBinding = this.onTap.bind(this));
-        CanvasManager.onCanvasRefresh(this.onRefreshBinding = this.draw.bind(this));
+        CanvasManager.onCanvasTap((this.onTapBinding = this.onTap.bind(this)));
+        CanvasManager.onCanvasRefresh(
+            (this.onRefreshBinding = this.draw.bind(this))
+        );
         if (this.board.maxX !== undefined && this.board.maxY !== undefined) {
             CanvasManager.setZoomFactor(this.board);
         }
@@ -44,7 +46,7 @@ export abstract class BaseClientRoom {
         const time = Math.floor((Date.now() - this.startTime) / 1000);
         const minutes = Math.floor(time / 60);
         const seconds = time % 60;
-        setTimeText(`Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+        setTimeText(`Time: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`);
         if (!this.ended) {
             requestAnimationFrame(this.setTimeText.bind(this));
         }
@@ -54,17 +56,17 @@ export abstract class BaseClientRoom {
         let point = CanvasManager.fromDrawPoint(x, y);
 
         switch (this.options.gridType) {
-            case 'square':
+            case "square":
                 point[0] = Math.floor(point[0]);
                 point[1] = Math.floor(point[1]);
                 break;
-            case 'hex':
+            case "hex":
                 point[1] *= DBL_INV_SQRT_3;
                 point[1] = Math.floor(point[1]);
                 point[0] -= point[1] / 2;
                 point[0] = Math.floor(point[0]);
                 break; // innacurate but good enough
-            case 'triangle':
+            case "triangle":
                 point[1] *= DBL_INV_SQRT_3;
                 point[0] -= point[1] / 2;
                 const og = [point[0], point[1]];
@@ -96,9 +98,14 @@ export abstract class BaseClientRoom {
     }
 
     draw() {
-        CanvasManager.ctx.clearRect(0, 0, CanvasManager.canvas.width, CanvasManager.canvas.height);
+        CanvasManager.ctx.clearRect(
+            0,
+            0,
+            CanvasManager.canvas.width,
+            CanvasManager.canvas.height
+        );
 
-        CanvasManager.ctx.strokeStyle = 'white';
+        CanvasManager.ctx.strokeStyle = "white";
 
         CanvasManager.drawSetCell(this.board);
         CanvasManager.drawGrid(this.board);

@@ -2,8 +2,7 @@ import { Socket } from "socket.io";
 
 export class SocketRef {
     private onMap: Map<string, ((...e: any) => void)[]> = new Map();
-    constructor(private socket: Socket) {
-    }
+    constructor(private socket: Socket) {}
 
     public on(e: string, cb: (...e: any) => void) {
         if (!this.onMap.has(e)) {
@@ -26,7 +25,6 @@ export class SocketRef {
         if (index > 0) {
             arr.splice(index, 1);
         }
-
 
         this.socket.off(e, cb);
     }
@@ -58,24 +56,27 @@ export class SocketReferences {
     private map: Map<string, SocketRef> = new Map();
 
     public newSocket(socket: Socket): Promise<SocketRef | void> {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             let listener: (uid: string) => void;
-            socket.on("uid", listener = (uid: string) => {
-                // FIXME: This is unsafe. Clients can spoof their uid.
-                // It would be better for the server to generate a random uid,
-                // send it to the client and wait for the client to confirm it.
-                socket.off("uid", listener);
+            socket.on(
+                "uid",
+                (listener = (uid: string) => {
+                    // FIXME: This is unsafe. Clients can spoof their uid.
+                    // It would be better for the server to generate a random uid,
+                    // send it to the client and wait for the client to confirm it.
+                    socket.off("uid", listener);
 
-                let ref = this.map.get(uid);
+                    let ref = this.map.get(uid);
 
-                if (ref === undefined) {
-                    this.map.set(uid, ref = new SocketRef(socket));
-                    resolve(ref);
-                } else {
-                    ref.setSocket(socket);
-                    resolve();
-                }
-            });
+                    if (ref === undefined) {
+                        this.map.set(uid, (ref = new SocketRef(socket)));
+                        resolve(ref);
+                    } else {
+                        ref.setSocket(socket);
+                        resolve();
+                    }
+                })
+            );
         });
     }
 }

@@ -1,5 +1,14 @@
 import { PlayerColor } from "../share/PlayerColor";
-import { ClientPacketNames, ClientPackets, emitPacket, offPacket, onPacket, RoomOptions, ServerPacketNames, ServerPackets } from "../share/Protocol";
+import {
+    ClientPacketNames,
+    ClientPackets,
+    emitPacket,
+    offPacket,
+    onPacket,
+    RoomOptions,
+    ServerPacketNames,
+    ServerPackets,
+} from "../share/Protocol";
 import { Board } from "../share/Board";
 import { SocketRef } from "./SocketReference";
 
@@ -13,8 +22,9 @@ export class ServerRoom {
     private sockets: SocketRef[] = [];
     public turn: number = 0;
     public started: boolean = false;
-    private listeners: Map<SocketRef, [ClientPacketNames, Function][]> = new Map();
-    public closeCb: () => void = () => { };
+    private listeners: Map<SocketRef, [ClientPacketNames, Function][]> =
+        new Map();
+    public closeCb: () => void = () => {};
     public closed: boolean = false;
 
     constructor(
@@ -25,9 +35,11 @@ export class ServerRoom {
         console.log("Game created: " + roomName);
     }
 
-    private emit<Name extends ServerPacketNames>(name: Name,
-        ...packet: (ClientPackets & ServerPackets)[Name]) {
-        this.sockets.forEach(s => emitPacket(s, name, ...packet));
+    private emit<Name extends ServerPacketNames>(
+        name: Name,
+        ...packet: (ClientPackets & ServerPackets)[Name]
+    ) {
+        this.sockets.forEach((s) => emitPacket(s, name, ...packet));
     }
 
     private emitAction(color: number, x: number, y: number) {
@@ -39,18 +51,28 @@ export class ServerRoom {
             denyAction(socket, "The game has not started.");
             return;
         }
-        if (this.playerNames[Math.floor(this.turn / this.options.playerTurns)] !== name) {
+        if (
+            this.playerNames[
+                Math.floor(this.turn / this.options.playerTurns)
+            ] !== name
+        ) {
             denyAction(socket, "It's not your turn.");
             return;
         }
-        const color = Math.floor(this.turn / this.options.teamSize / this.options.playerTurns);
+        const color = Math.floor(
+            this.turn / this.options.teamSize / this.options.playerTurns
+        );
         const result = this.board.setCell(x, y, color);
         if (typeof result === "string") {
             denyAction(socket, result);
             return;
         }
 
-        this.turn = (this.turn + 1) % (this.options.teamSize * this.options.teamCount * this.options.playerTurns);
+        this.turn =
+            (this.turn + 1) %
+            (this.options.teamSize *
+                this.options.teamCount *
+                this.options.playerTurns);
 
         this.emitAction(color, x, y);
 
@@ -76,7 +98,11 @@ export class ServerRoom {
             emitPacket(socket, "joinReject", "Game full."); // should never happen but just in case
             return;
         }
-        if (username == null || username.trim() === "" || username.toLowerCase() === "shoghi") {
+        if (
+            username == null ||
+            username.trim() === "" ||
+            username.toLowerCase() === "shoghi"
+        ) {
             emitPacket(socket, "joinReject", "Bad username.");
             return;
         }
@@ -90,7 +116,8 @@ export class ServerRoom {
 
             const listen = <Name extends ClientPacketNames>(
                 name: Name,
-                listener: (...arg1: (ClientPackets)[Name]) => void) => {
+                listener: (...arg1: ClientPackets[Name]) => void
+            ) => {
                 this.listeners.get(socket)!.push([name, listener]);
                 onPacket(socket, name, listener);
             };
@@ -100,7 +127,7 @@ export class ServerRoom {
             });
 
             listen("chat", (msg: string) => {
-                if (msg.trim() === '') return;
+                if (msg.trim() === "") return;
                 this.emit("playerChat", username, msg);
             });
 
@@ -117,7 +144,7 @@ export class ServerRoom {
             this.sockets.splice(turn, 0, socket);
             console.log(turn, this.options.teamOrder, this.playerNames);
 
-            socket.on('disconnect', () => {
+            socket.on("disconnect", () => {
                 socket.callIfNotReplaced(() => {
                     if (this.closed) {
                         return;
@@ -128,7 +155,10 @@ export class ServerRoom {
 
             this.emit("players", this.playerNames);
 
-            if (this.sockets.length === this.options.teamCount * this.options.teamSize) {
+            if (
+                this.sockets.length ===
+                this.options.teamCount * this.options.teamSize
+            ) {
                 this.start();
             }
         } catch (e) {
@@ -142,7 +172,7 @@ export class ServerRoom {
         }
         this.started = true;
         for (let i = 0; i < this.sockets.length; i++) {
-            emitPacket(this.sockets[i], 'gameStarted', i);
+            emitPacket(this.sockets[i], "gameStarted", i);
         }
         console.log("Game Started: ", this.roomName);
     }

@@ -1,9 +1,15 @@
 import { getHexForColor } from "../share/PlayerColor";
-import { Vec2, clamp, cartesianToHex, hexToCartesian, mod } from "../share/Utils";
+import {
+    Vec2,
+    clamp,
+    cartesianToHex,
+    hexToCartesian,
+    mod,
+} from "../share/Utils";
 import Board from "../share/Board";
 
-export const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-export const ctx = canvas.getContext('2d')!;
+export const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+export const ctx = canvas.getContext("2d")!;
 canvas.width = canvas.clientWidth;
 canvas.height = canvas.clientHeight;
 
@@ -58,10 +64,10 @@ export function refresh() {
 let pos: Vec2 = [0, 0];
 let zoom = 50;
 
-const minZoom = zoom * (2 ** -2);
-const maxZoom = zoom * (2 ** 2);
+const minZoom = zoom * 2 ** -2;
+const maxZoom = zoom * 2 ** 2;
 
-canvas.addEventListener('wheel', (event) => {
+canvas.addEventListener("wheel", (event) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -75,7 +81,7 @@ canvas.addEventListener('wheel', (event) => {
     const diffY = pos[1] - mouseY;
 
     const oldZoom = zoom;
-    const newZoom = clamp(oldZoom * (zoomAmount ** -delta), minZoom, maxZoom);
+    const newZoom = clamp(oldZoom * zoomAmount ** -delta, minZoom, maxZoom);
 
     const newX = mouseX + diffX * (newZoom / oldZoom);
     const newY = mouseY + diffY * (newZoom / oldZoom);
@@ -88,7 +94,7 @@ canvas.addEventListener('wheel', (event) => {
     refresh();
 });
 
-canvas.addEventListener('mousedown', (event) => {
+canvas.addEventListener("mousedown", (event) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -107,9 +113,11 @@ canvas.addEventListener('mousedown', (event) => {
         const diff: Vec2 = [newPos[0] - mousePos[0], newPos[1] - mousePos[1]];
 
         if (!tap) {
-        } else if ((Date.now() - time > tapMaxTime ||
+        } else if (
+            Date.now() - time > tapMaxTime ||
             Math.abs(diff[0]) > tapMaxDistance ||
-            Math.abs(diff[1]) > tapMaxDistance)) {
+            Math.abs(diff[1]) > tapMaxDistance
+        ) {
             tap = false;
         } else {
             return;
@@ -123,17 +131,16 @@ canvas.addEventListener('mousedown', (event) => {
         event.preventDefault();
         event.stopPropagation();
 
-        canvas.removeEventListener('mousemove', move);
-        canvas.removeEventListener('mouseup', up);
-
+        canvas.removeEventListener("mousemove", move);
+        canvas.removeEventListener("mouseup", up);
 
         if (tap) {
-            tapObservers.forEach(cb => cb(mousePos));
+            tapObservers.forEach((cb) => cb(mousePos));
         }
     };
 
-    canvas.addEventListener('mousemove', move);
-    canvas.addEventListener('mouseup', up);
+    canvas.addEventListener("mousemove", move);
+    canvas.addEventListener("mouseup", up);
 });
 
 function getCenter(touches: TouchList): Vec2 {
@@ -150,7 +157,10 @@ function getCenter(touches: TouchList): Vec2 {
     return [x / touches.length, y / touches.length];
 }
 
-function getAverageDistanceFromCenter(touches: TouchList, center: Vec2): number {
+function getAverageDistanceFromCenter(
+    touches: TouchList,
+    center: Vec2
+): number {
     let dist = 0;
 
     for (let i = 0; i < touches.length; i++) {
@@ -166,7 +176,7 @@ function getAverageDistanceFromCenter(touches: TouchList, center: Vec2): number 
     return Math.sqrt(dist);
 }
 
-canvas.addEventListener('touchstart', (event) => {
+canvas.addEventListener("touchstart", (event) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -209,8 +219,10 @@ canvas.addEventListener('touchstart', (event) => {
             const diffX = x - touchPos[0];
             const diffY = y - touchPos[1];
 
-            if (Math.abs(diffX) > tapMaxDistance ||
-                Math.abs(diffY) > tapMaxDistance) {
+            if (
+                Math.abs(diffX) > tapMaxDistance ||
+                Math.abs(diffY) > tapMaxDistance
+            ) {
                 tap = false;
             } else {
                 return;
@@ -232,7 +244,11 @@ canvas.addEventListener('touchstart', (event) => {
             const multiplicativeDelta = dist / prevDist;
 
             const oldZoom = zoom;
-            const newZoom = clamp(oldZoom * multiplicativeDelta, minZoom, maxZoom);
+            const newZoom = clamp(
+                oldZoom * multiplicativeDelta,
+                minZoom,
+                maxZoom
+            );
             const newX = center[0] - mapPos[0] * newZoom;
             const newY = center[1] - mapPos[1] * newZoom;
 
@@ -247,7 +263,10 @@ canvas.addEventListener('touchstart', (event) => {
         } else {
             prevDist = null;
 
-            const touch: Vec2 = [event.touches[0].clientX, event.touches[0].clientY];
+            const touch: Vec2 = [
+                event.touches[0].clientX,
+                event.touches[0].clientY,
+            ];
             const diff: Vec2 = [touch[0] - touchPos[0], touch[1] - touchPos[1]];
 
             pos = [oldPos[0] + diff[0], oldPos[1] + diff[1]];
@@ -260,12 +279,12 @@ canvas.addEventListener('touchstart', (event) => {
         event.stopPropagation();
 
         if (event.touches.length === 0) {
-            canvas.removeEventListener('touchstart', start);
-            canvas.removeEventListener('touchmove', move);
-            canvas.removeEventListener('touchend', up);
+            canvas.removeEventListener("touchstart", start);
+            canvas.removeEventListener("touchmove", move);
+            canvas.removeEventListener("touchend", up);
 
             if (tap) {
-                tapObservers.forEach(cb => cb(touchPos));
+                tapObservers.forEach((cb) => cb(touchPos));
             }
         } else {
             [touchPos[0], touchPos[1]] = getCenter(event.touches);
@@ -274,9 +293,9 @@ canvas.addEventListener('touchstart', (event) => {
         }
     };
 
-    canvas.addEventListener('touchstart', start);
-    canvas.addEventListener('touchmove', move);
-    canvas.addEventListener('touchend', up);
+    canvas.addEventListener("touchstart", start);
+    canvas.addEventListener("touchmove", move);
+    canvas.addEventListener("touchend", up);
 });
 
 // Drawing I guess
@@ -289,7 +308,12 @@ export function fromDrawPoint(x: number, y: number): Vec2 {
     return [(x - pos[0]) / zoom, (y - pos[1]) / zoom];
 }
 
-export function drawCell(x: number, y: number, color: string, size: number = 1) {
+export function drawCell(
+    x: number,
+    y: number,
+    color: string,
+    size: number = 1
+) {
     const [x1, y1] = toDrawPoint(x, y);
     const [x2, y2] = toDrawPoint(x + size, y + size);
     ctx.fillStyle = color;
@@ -329,12 +353,12 @@ export function drawSetCell(board: Board) {
     if (cell === undefined) {
         return;
     }
-    ctx.fillStyle = '#fff9';
+    ctx.fillStyle = "#fff9";
     switch (board.gridType) {
-        case 'square':
+        case "square":
             fillRect(...cell, cell[0] + 1, cell[1] + 1);
             break;
-        case 'hex': {
+        case "hex": {
             cell = cartesianToHex(...cell);
 
             let [x, y] = cell;
@@ -352,21 +376,29 @@ export function drawSetCell(board: Board) {
             fillShape([p1, p2, p3, p4, p5, p6]);
             break;
         }
-        case 'triangle': {
+        case "triangle": {
             let [x, y] = cell;
             const ymod = mod(y, 2);
             let [x1, y1] = cartesianToHex(x, Math.floor(y / 2) + ymod);
-            let [x2, y2] = [x1 + 0.5, y1 +
-                (ymod === 0 ? 1 : -1) * HALF_SQRT_3];
+            let [x2, y2] = [x1 + 0.5, y1 + (ymod === 0 ? 1 : -1) * HALF_SQRT_3];
             let [x3, y3] = [x1 + 1, y1];
 
-            fillShape([[x1, y1], [x2, y2], [x3, y3]]);
+            fillShape([
+                [x1, y1],
+                [x2, y2],
+                [x3, y3],
+            ]);
             break;
         }
     }
 }
 
-function _drawSquareGrid(startX: number, startY: number, endX: number, endY: number) {
+function _drawSquareGrid(
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number
+) {
     for (let x = startX; x <= endX; x++) {
         drawLine(x, startY, x, endY);
     }
@@ -379,7 +411,12 @@ const ISQRT_3 = 1 / Math.sqrt(3);
 const HALF_ISQRT_3 = ISQRT_3 / 2;
 const HALF_SQRT_3 = Math.sqrt(3) / 2;
 
-function _drawHexGrid(startX: number, startY: number, endX: number, endY: number) {
+function _drawHexGrid(
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number
+) {
     for (let x = startX; x < endX; x++) {
         for (let y = startY; y < endY; y++) {
             let [cx, cy] = cartesianToHex(x, y);
@@ -399,16 +436,31 @@ function _drawHexGrid(startX: number, startY: number, endX: number, endY: number
                 drawLine(x2 - 1, y2, x3 - 1, y3);
             }
             if (x === startX || y === endY - 1) {
-                drawLine(x1 - 0.5, y1 + HALF_SQRT_3, x2 - 0.5, y2 + HALF_SQRT_3);
+                drawLine(
+                    x1 - 0.5,
+                    y1 + HALF_SQRT_3,
+                    x2 - 0.5,
+                    y2 + HALF_SQRT_3
+                );
             }
             if (y === startY) {
-                drawLine(x3 - 0.5, y3 - HALF_SQRT_3, x4 - 0.5, y4 - HALF_SQRT_3);
+                drawLine(
+                    x3 - 0.5,
+                    y3 - HALF_SQRT_3,
+                    x4 - 0.5,
+                    y4 - HALF_SQRT_3
+                );
             }
         }
     }
 }
 
-function _drawTriangleGrid(startX: number, startY: number, endX: number, endY: number) {
+function _drawTriangleGrid(
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number
+) {
     const draw = (() => {
         const sx = startX + startY * 0.5;
         const sy = startY * HALF_SQRT_3;
@@ -466,13 +518,13 @@ export function drawGrid(board: Board) {
     let min = fromDrawPoint(0, 0);
     let max = fromDrawPoint(width, height);
     switch (board.gridType) {
-        case 'hex':
+        case "hex":
             min = hexToCartesian(...min);
             max = hexToCartesian(...max);
             min[0] -= width / zoom;
             max[0] += width / zoom;
             break;
-        case 'triangle':
+        case "triangle":
             break;
     }
     min[0] = Math.floor(min[0]);
@@ -505,16 +557,18 @@ export function drawBoard(board: Board) {
         let x1 = x;
         let y1 = y;
         switch (board.gridType) {
-            case 'hex':
+            case "hex":
                 [x1, y1] = cartesianToHex(x, y);
-            case 'square':
+            case "square":
                 drawCell(x1, y1, getHexForColor(color));
                 break;
-            case 'triangle':
+            case "triangle":
                 const ymod = mod(y, 2);
                 [x1, y1] = cartesianToHex(x, Math.floor(y / 2) + ymod);
-                let [x2, y2] = [x1 + 0.5, y1 +
-                    (ymod === 0 ? 1 : -1) * HALF_SQRT_3];
+                let [x2, y2] = [
+                    x1 + 0.5,
+                    y1 + (ymod === 0 ? 1 : -1) * HALF_SQRT_3,
+                ];
                 let [x3, y3] = [x1 + 1, y1];
 
                 const inset = 0.125;
@@ -527,7 +581,11 @@ export function drawBoard(board: Board) {
                 x3 -= inset * HALF_SQRT_3;
                 y3 += inset * 0.5 * d;
                 ctx.fillStyle = getHexForColor(color);
-                fillShape([[x1, y1], [x2, y2], [x3, y3]]);
+                fillShape([
+                    [x1, y1],
+                    [x2, y2],
+                    [x3, y3],
+                ]);
                 break;
         }
     }
@@ -537,7 +595,7 @@ export function drawBoard(board: Board) {
     //         let y1 = y;
     //         const ymod = mod(y, 2);
     //         [x1, y1] = cartesianToHex(x, Math.floor(y / 2) + ymod);
-            
+
     //         let [x2, y2] = [x1 + 0.5, y1 +
     //             (ymod === 0 ? 1 : -1) * HALF_SQRT_3];
     //         let [x3, y3] = [x1 + 1, y1];
@@ -549,7 +607,7 @@ export function drawBoard(board: Board) {
     //         [x3, y3] = toDrawPoint(x3, y3);
 
     //         ctx.textAlign = "center";
-            
+
     //         ctx.fillText(`(${x}, ${y})`, (x1 + x2 + x3) / 3, (y1 + y2 + y3) / 3);
     //     }
     // }
@@ -557,17 +615,17 @@ export function drawBoard(board: Board) {
 
 export function drawWinningLines(board: Board, winningLines: Vec2[][]) {
     ctx.lineWidth = 5;
-    ctx.lineCap = 'round';
+    ctx.lineCap = "round";
     for (const line of winningLines) {
         let [x1, y1] = line[0];
         let [x2, y2] = line[1];
 
         switch (board.gridType) {
-            case 'square':
+            case "square":
                 [x1, y1] = [x1 + 0.5, y1 + 0.5];
                 [x2, y2] = [x2 + 0.5, y2 + 0.5];
                 break;
-            case 'hex':
+            case "hex":
                 [x1, y1] = cartesianToHex(x1, y1);
                 [x2, y2] = cartesianToHex(x2, y2);
                 y1 += 0.5;
@@ -575,7 +633,7 @@ export function drawWinningLines(board: Board, winningLines: Vec2[][]) {
                 x1 += 0.5;
                 x2 += 0.5;
                 break;
-            case 'triangle':
+            case "triangle":
                 const ogY1 = y1;
                 const ogY2 = y2;
                 [x1, y1] = cartesianToHex(x1, Math.floor(y1 / 2));
@@ -601,18 +659,22 @@ export function drawWinningLines(board: Board, winningLines: Vec2[][]) {
 }
 
 export function setZoomFactor(board: Board) {
-    if (board.minX === undefined || board.maxX === undefined ||
-        board.minY === undefined || board.maxY === undefined) {
+    if (
+        board.minX === undefined ||
+        board.maxX === undefined ||
+        board.minY === undefined ||
+        board.maxY === undefined
+    ) {
         return;
     }
     let min: Vec2 = [board.minX, board.minY];
     let max: Vec2 = [board.maxX, board.maxY];
 
     switch (board.gridType) {
-        case 'triangle':
+        case "triangle":
             min[1] /= 2;
             max[1] /= 2;
-        case 'hex':
+        case "hex":
             min = cartesianToHex(...min);
             max = cartesianToHex(...max);
             break;
