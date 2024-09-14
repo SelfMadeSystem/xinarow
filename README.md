@@ -47,7 +47,7 @@ It will be reviewed and merged if it is good.
 ## Contact
 
 If you have any issues, please open an issue on the GitHub repository. If you
-want to contact me, my discord is `SelfMadeSystem#3808`.
+want to contact me, my discord is `SelfMadeSystem`.
 
 ## License
 
