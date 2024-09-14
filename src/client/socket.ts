@@ -55,6 +55,7 @@ if (multiplayerSupport) {
     socket.connect();
 } else {
     console.log("Multiplayer support disabled");
+    socket.close();
 }
 
 export function on(event: ServerPacketNames, listener: Function) {
