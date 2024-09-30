@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import socket from "./src/server/socket";
 
 const multiplayerSupport = process.env.VITE_MULTIPLAYER === "true";
+const noServer = process.env.VITE_NO_SERVER === "true";
 
 const port = Math.floor(Math.random() * 1000) + 3000;
 
@@ -43,6 +44,6 @@ export default defineConfig({
     appType: "spa",
 });
 
-if (multiplayerSupport) {
+if (multiplayerSupport && !noServer) {
     socket(port);
 }
