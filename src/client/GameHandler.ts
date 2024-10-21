@@ -9,6 +9,13 @@ let username = `user-${uid.substring(0, 8)}`;
         username = localUsername;
     }
 }
+
+let commandHandler: (command: string) => boolean = () => false;
+
+export function setCommandHandler(handler: (command: string) => boolean) {
+    commandHandler = handler;
+}
+
 export function setUsername(s: string) {
     username = s;
     localStorage.setItem("xinarow-username", s);
@@ -57,5 +64,10 @@ export async function ping() {
 }
 
 export function chat(message: string) {
+    if (message.startsWith("/")) {
+        if (commandHandler(message)) {
+            return;
+        }
+    }
     emit("chat", message);
 }

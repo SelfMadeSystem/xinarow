@@ -3,7 +3,7 @@ export enum PlayerColor {
     Green,
     Blue,
     Yellow,
-    Purple,
+    Magenta,
     Cyan,
     Orange,
     Pink,
@@ -19,7 +19,7 @@ export function getHexForColor(color: PlayerColor): string {
             return "#0000ff";
         case PlayerColor.Yellow:
             return "#ffff00";
-        case PlayerColor.Purple:
+        case PlayerColor.Magenta:
             return "#dd00bb";
         case PlayerColor.Cyan:
             return "#00ffff";
@@ -40,8 +40,8 @@ export function colorName(color: PlayerColor) {
             return "blue";
         case PlayerColor.Yellow:
             return "yellow";
-        case PlayerColor.Purple:
-            return "purple";
+        case PlayerColor.Magenta:
+            return "magenta";
         case PlayerColor.Cyan:
             return "cyan";
         case PlayerColor.Orange:

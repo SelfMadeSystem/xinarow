@@ -1,10 +1,12 @@
 import { PlayerColor } from "../share/PlayerColor";
 import { onPacket, offPacket, RoomOptions } from "../share/Protocol";
-import { action } from "./GameHandler";
+import { action, setCommandHandler } from "./GameHandler";
 import { socket } from "./socket";
 import { Vec2 } from "../share/Utils";
 import { addChatMessage, addPlayerJoinMessage, setTurnText } from "./main";
 import BaseClientRoom from "./BaseClientRoom";
+
+const metalPipeUrl = "/metal-pipe.mp3";
 
 export class OnlineClientRoom extends BaseClientRoom {
     constructor(roomName: string, options: RoomOptions) {
@@ -87,6 +89,11 @@ export class OnlineClientRoom extends BaseClientRoom {
             socket,
             "playerChat",
             (fChat = (username: string, message: string) => {
+                if (message.startsWith("/")) {
+                    if (this.handleOthersCommand(username, message)) {
+                        return;
+                    }
+                }
                 addChatMessage(message, username);
             })
         );
@@ -106,6 +113,54 @@ export class OnlineClientRoom extends BaseClientRoom {
 
             offPacket(socket, "playerChat", fChat);
         };
+
+        setCommandHandler(this.handleCommand.bind(this));
+    }
+
+    handleOthersCommand(username: string, message: string): boolean {
+        const [command, ..._args] = message.slice(1).split(" ");
+        switch (command) {
+            case "metalpipe": {
+                if (this.turn === this.myTurn) {
+                    if (username === this.playerNames[this.myTurn]) {
+                        addChatMessage(
+                            "You can't use /metalpipe on your turn!",
+                            "/metalpipe"
+                        );
+                        return true;
+                    }
+                    const metalPipe = new Audio(metalPipeUrl);
+                    metalPipe.play();
+                    addChatMessage(
+                        `${username} played a metal pipe sound!`,
+                        ""
+                    );
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    handleCommand(message: string): boolean {
+        const [command, ..._args] = message.slice(1).split(" ");
+        switch (command) {
+            case "turn": {
+                addChatMessage(
+                    `It's turn ${this.turn}. Turn order is: red, green, blue, yellow, magenta, cyan, orange, pink.`,
+                    "/turn"
+                );
+                return true;
+            }
+            case "options": {
+                addChatMessage(
+                    `Options: ${JSON.stringify(this.options, null, 2)}`,
+                    "/options"
+                );
+                return true;
+            }
+        }
+        return false;
     }
 
     override setCell(x: number, y: number) {
