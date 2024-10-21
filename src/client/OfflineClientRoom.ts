@@ -6,6 +6,7 @@ export class OfflineClientRoom extends BaseClientRoom {
     constructor(roomName: string, options: RoomOptions) {
         super(roomName, options);
 
+        this.turn = 0;
         setTurnText(this.turn, -1, this.options);
     }
     async setCell(x: number, y: number): Promise<string | boolean> {
