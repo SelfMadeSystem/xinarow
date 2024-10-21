@@ -3,7 +3,7 @@ import "./style.scss";
 import { OnlineClientRoom } from "./OnlineClientRoom";
 import { chat, create, join } from "./GameHandler";
 import { colorName } from "../share/PlayerColor";
-import { capitalizeFirst } from "../share/Utils";
+import { capitalizeFirst, SearchRoomResponse } from "../share/Utils";
 import { OfflineClientRoom } from "./OfflineClientRoom";
 import { GridType, RoomOptions, TeamOrder } from "../share/Protocol";
 import { setUsername, getUsername } from "./GameHandler";
@@ -109,6 +109,10 @@ export function addChatMessage(message: string, username: string) {
 
     chatMessages.appendChild(messageElement);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+export function addPlayerJoinMessage(username: string) {
+    addChatMessage("", `${username} joined the game.`);
 }
 
 function clearChat() {
@@ -218,6 +222,12 @@ const createDensityPercent = document.getElementById(
 const createOnline = document.getElementById(
     "create-online"
 )! as HTMLInputElement;
+const searchButton = document.getElementById(
+    "search-button"
+)! as HTMLInputElement;
+const searchResults = document.getElementById(
+    "search-results"
+)! as HTMLDivElement;
 
 createButton.addEventListener("click", async () => {
     const roomName = createName.value as string;
@@ -394,6 +404,27 @@ presetsSelect.addEventListener("change", () => {
     createExpandLength.value = preset.expandLength.toString();
     createExpandDensity.value = preset.expandDensity.toString();
     createDensityPercent.checked = preset.densityPercent;
+});
+
+searchButton.addEventListener("click", async () => {
+    const results: SearchRoomResponse = await fetch("/rooms").then((res) => res.json());
+    searchResults.innerHTML = "";
+
+    if (results.length === 0) {
+        searchResults.innerText = "No games found.";
+        return;
+    }
+
+    results.forEach(([roomName, playerCount, maxPlayers]) => {
+        const element = document.createElement("div");
+        element.classList.add("room");
+        element.innerText = `${roomName} (${playerCount}/${maxPlayers})`;
+        element.addEventListener("click", () => {
+            joinName.value = roomName;
+            joinButton.click();
+        });
+        searchResults.appendChild(element);
+    });
 });
 
 // main.ts

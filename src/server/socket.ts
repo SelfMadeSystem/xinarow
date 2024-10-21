@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import { emitPacket, onPacket, RoomOptions } from "../share/Protocol";
 import { ServerRoom } from "./ServerRoom";
 import { SocketReferences } from "./SocketReference";
+import { SearchRoomResponse } from "../share/Utils";
 
 const rooms: Map<string, ServerRoom> = new Map();
 
@@ -12,6 +13,14 @@ function zeroWidthTrim(stringToTrim: string) {
         /([\u200B]+|[\u200C]+|[\u200D]+|[\u200E]+|[\u200F]+|[\uFEFF]+)/g;
     const trimmedString = stringToTrim.replace(ZERO_WIDTH_SPACES_REGEX, "");
     return trimmedString;
+}
+
+export function getRooms(): SearchRoomResponse {
+    return Array.from(rooms.values()).map((r) => [
+        r.roomName,
+        r.playerNames.length,
+        r.options.teamCount * r.options.teamSize,
+    ]);
 }
 
 export default function socket(server?: any) {

@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import socket from "./src/server/socket";
+import socket, { getRooms } from "./src/server/socket";
 
 const multiplayerSupport = process.env.VITE_MULTIPLAYER === "true";
 const noServer = process.env.VITE_NO_SERVER === "true";
@@ -19,6 +19,20 @@ export default defineConfig({
                           target: `ws://localhost:${port}`,
                           changeOrigin: true,
                           ws: true,
+                      },
+                      "/rooms": {
+                          configure(proxy, options) {
+                              proxy.on("start", async (req, res, target) => {
+                                  if (req.url === "/rooms") {
+                                      res.setHeader(
+                                          "content-type",
+                                          "application/json"
+                                      );
+                                      res.end(JSON.stringify(getRooms()));
+                                  }
+                              });
+                          },
+                          target: `http://localhost:${port}`,
                       },
                   },
               }

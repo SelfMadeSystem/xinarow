@@ -226,6 +226,12 @@ h1 {
   margin-top: 0;
 }
 
+.room {
+  color: #9797ff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .checkbox-container {
   cursor: pointer;
   display: inline-flex;
@@ -256,4 +262,3 @@ h1 {
   stroke-dasharray: 70.5096664428711 9999999;
   stroke-dashoffset: -262.2723388671875;
 }
-

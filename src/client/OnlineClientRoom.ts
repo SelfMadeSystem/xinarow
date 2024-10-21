@@ -3,7 +3,7 @@ import { onPacket, offPacket, RoomOptions } from "../share/Protocol";
 import { action } from "./GameHandler";
 import { socket } from "./socket";
 import { Vec2 } from "../share/Utils";
-import { addChatMessage, setTurnText } from "./main";
+import { addChatMessage, addPlayerJoinMessage, setTurnText } from "./main";
 import BaseClientRoom from "./BaseClientRoom";
 
 export class OnlineClientRoom extends BaseClientRoom {
@@ -28,7 +28,11 @@ export class OnlineClientRoom extends BaseClientRoom {
             (fActionTaken = this.actionTaken.bind(this))
         );
 
-        onPacket(socket, "players", (fPlayers = (u) => (this.playerNames = u)));
+        onPacket(socket, "players", (fPlayers = (u) => {
+            const newPlayers = u.filter((p) => !this.playerNames.includes(p));
+            newPlayers.forEach(addPlayerJoinMessage);
+            this.playerNames = u;
+        }));
 
         onPacket(
             socket,

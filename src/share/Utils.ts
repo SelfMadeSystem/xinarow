@@ -1,3 +1,5 @@
+export type SearchRoomResponse = [name: string, playerCount: number, playersMax: number][];
+
 export function jsonClone<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj));
 }

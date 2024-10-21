@@ -1,157 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>X In A Row</title>
+    </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>X In A Row</title>
-</head>
-
-<body>
-  <div id="app">
-    <canvas id="canvas"></canvas>
-    <div id="overlay">
-      <div id="loading"></div>
-      <div id="turn">Game starting...</div>
-      <div id="time">Time: 0:00</div>
-      <input type="checkbox" id="chat-input-hide" />
-      <label id="chat-show" for="chat-input-hide" >
-        <svg width="2em" height="2em" fill="white" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24"><title>Open Chat</title><path d="M12 3C6.5 3 2 6.58 2 11C2.05 13.15 3.06 15.17 4.75 16.5C4.75 17.1 4.33 18.67 2 21C4.37 20.89 6.64 20 8.47 18.5C9.61 18.83 10.81 19 12 19C17.5 19 22 15.42 22 11S17.5 3 12 3M12 17C7.58 17 4 14.31 4 11S7.58 5 12 5 20 7.69 20 11 16.42 17 12 17M17 12V10H15V12H17M13 12V10H11V12H13M9 12V10H7V12H9Z" /></svg>
-      </label>
-      <div id="chat">
-        <div id="chat-messages">
-          <div class="message">
-            <div class="username">Username</div>
-            <div class="text">Message</div>
-          </div>
+    <body>
+        <div id="app">
+            <canvas id="canvas"></canvas>
+            <div id="overlay">
+                <div id="loading"></div>
+                <div id="turn">Game starting...</div>
+                <div id="time">Time: 0:00</div>
+                <input type="checkbox" id="chat-input-hide" />
+                <label id="chat-show" for="chat-input-hide">
+                    <svg
+                        width="2em"
+                        height="2em"
+                        fill="white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewbox="0 0 24 24"
+                    >
+                        <title>Open Chat</title>
+                        <path
+                            d="M12 3C6.5 3 2 6.58 2 11C2.05 13.15 3.06 15.17 4.75 16.5C4.75 17.1 4.33 18.67 2 21C4.37 20.89 6.64 20 8.47 18.5C9.61 18.83 10.81 19 12 19C17.5 19 22 15.42 22 11S17.5 3 12 3M12 17C7.58 17 4 14.31 4 11S7.58 5 12 5 20 7.69 20 11 16.42 17 12 17M17 12V10H15V12H17M13 12V10H11V12H13M9 12V10H7V12H9Z"
+                        />
+                    </svg>
+                </label>
+                <div id="chat">
+                    <div id="chat-messages">
+                        <div class="message">
+                            <div class="username">Username</div>
+                            <div class="text">Message</div>
+                        </div>
+                    </div>
+                    <div id="chat-input">
+                        <input type="text" id="chat-input-text" value="" />
+                        <button id="chat-input-button">Send</button>
+                    </div>
+                    <label for="chat-input-hide" id="chat-input-hide-label"
+                        >x</label
+                    >
+                </div>
+                <div id="main-menu">
+                    <div class="online-only" id="username">
+                        <label>
+                            Username:
+                            <input type="text" id="username-input" value="" />
+                        </label>
+                    </div>
+                    <div id="games">
+                        <div id="create-game">
+                            <h1>Create game</h1>
+                            <label class="online-only">
+                                Room name:
+                                <input type="text" id="create-name" value="" />
+                            </label>
+                            <label id="presets">
+                                Presets:
+                                <select id="presets-select">
+                                    <option value="custom"></option>
+                                    <option value="tictactoe">
+                                        Tic Tac Toe
+                                    </option>
+                                    <option value="connect4">Connect 4</option>
+                                    <option value="connect5">
+                                        Connect 5 - 3 player
+                                    </option>
+                                    <option value="gomoku">Gomoku</option>
+                                    <option value="gomoku-10x10">
+                                        Gomoku 10x10
+                                    </option>
+                                    <option value="hex">Hex</option>
+                                    <option value="triangle">Triangle</option>
+                                    <option value="infiniteconnect4">
+                                        Infinite Connect 4
+                                    </option>
+                                    <option value="infinitegomoku">
+                                        Infinite Gomoku
+                                    </option>
+                                    <option value="infinitehex">
+                                        Infinite Hex
+                                    </option>
+                                    <option value="infinitetriangle">
+                                        Infinite Triangle
+                                    </option>
+                                </select>
+                            </label>
+                            <label>
+                                Gravity:
+                                <label class="checkbox-container">
+                                    <input
+                                        type="checkbox"
+                                        id="create-gravity"
+                                    />
+                                    <svg
+                                        viewBox="0 0 64 64"
+                                        height="1em"
+                                        width="1em"
+                                    >
+                                        <path
+                                            d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
+                                            pathLength="575.0541381835938"
+                                            class="path"
+                                        ></path>
+                                    </svg>
+                                </label>
+                            </label>
+                            <label>
+                                Grid Type:
+                                <select id="create-grid-type">
+                                    <option value="square">Square</option>
+                                    <option value="hex">Hexagon</option>
+                                    <option value="triangle">Triangle</option>
+                                </select>
+                            </label>
+                            <label>
+                                N In A Row:
+                                <input
+                                    type="number"
+                                    id="create-n-in-a-row"
+                                    value="5"
+                                    min="1"
+                                    step="1"
+                                />
+                            </label>
+                            <label>
+                                Team Count:
+                                <input
+                                    type="number"
+                                    id="create-team-count"
+                                    value="2"
+                                    min="1"
+                                    max="8"
+                                    step="1"
+                                />
+                            </label>
+                            <label>
+                                Team Size:
+                                <input
+                                    type="number"
+                                    id="create-team-size"
+                                    value="1"
+                                    min="1"
+                                    max="8"
+                                    step="1"
+                                />
+                            </label>
+                            <label>
+                                Turns Per Player:
+                                <input
+                                    type="number"
+                                    id="create-player-turns"
+                                    value="1"
+                                    min="1"
+                                    max="8"
+                                    step="1"
+                                />
+                            </label>
+                            <label>
+                                Team Order:
+                                <select id="create-team-order">
+                                    <option value="random">Random</option>
+                                    <option value="join">Join Order</option>
+                                </select>
+                            </label>
+                            <label>
+                                Width:
+                                <input
+                                    type="number"
+                                    id="create-width"
+                                    value="15"
+                                    min="1"
+                                    step="1"
+                                />
+                            </label>
+                            <label>
+                                Height:
+                                <input
+                                    type="number"
+                                    id="create-height"
+                                    value="15"
+                                    min="1"
+                                    step="1"
+                                />
+                            </label>
+                            <label>
+                                Expand Length:
+                                <input
+                                    type="number"
+                                    id="create-expand-length"
+                                    value="0"
+                                    min="0"
+                                    step="1"
+                                />
+                            </label>
+                            <label>
+                                Expand Density:
+                                <input
+                                    type="number"
+                                    id="create-expand-density"
+                                    value="0"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                />
+                            </label>
+                            <label>
+                                Density Percentage (instead of count):
+                                <label class="checkbox-container">
+                                    <input
+                                        type="checkbox"
+                                        id="create-density-percent"
+                                    />
+                                    <svg
+                                        viewBox="0 0 64 64"
+                                        height="1em"
+                                        width="1em"
+                                    >
+                                        <path
+                                            d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
+                                            pathLength="575.0541381835938"
+                                            class="path"
+                                        ></path>
+                                    </svg>
+                                </label>
+                            </label>
+                            <label class="online-only">
+                                Online:
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="create-online" checked />
+                                    <svg
+                                        viewBox="0 0 64 64"
+                                        height="1em"
+                                        width="1em"
+                                    >
+                                        <path
+                                            d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16"
+                                            pathLength="575.0541381835938"
+                                            class="path"
+                                        ></path>
+                                    </svg>
+                                </label>
+                            </label>
+                            <button id="create-button">Create</button>
+                        </div>
+                        <div id="join-game" class="online-only">
+                            <h1>Join game</h1>
+                            <label>
+                                Room name:
+                                <input type="text" id="join-name" value="" />
+                            </label>
+                            <button id="join-button">Join</button>
+                            <button id="search-button">Search</button>
+                            <div id="search-results"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div id="chat-input">
-          <input type="text" id="chat-input-text" value="" />
-          <button id="chat-input-button">Send</button>
-        </div>
-        <label for="chat-input-hide" id="chat-input-hide-label">x</label>
-      </div>
-      <div id="main-menu">
-        <div class="online-only" id="username">
-          <label>
-            Username:
-            <input type="text" id="username-input" value="" />
-          </label>
-        </div>
-        <div id="games">
-          <div id="create-game">
-            <h1>Create game</h1>
-            <label class="online-only">
-              Room name:
-              <input type="text" id="create-name" value="" />
-            </label>
-            <label id="presets">
-              Presets:
-              <select id="presets-select">
-                <option value="custom"></option>
-                <option value="tictactoe">Tic Tac Toe</option>
-                <option value="connect4">Connect 4</option>
-                <option value="connect5">Connect 5 - 3 player</option>
-                <option value="gomoku">Gomoku</option>
-                <option value="gomoku-10x10">Gomoku 10x10</option>
-                <option value="hex">Hex</option>
-                <option value="triangle">Triangle</option>
-                <option value="infiniteconnect4">Infinite Connect 4</option>
-                <option value="infinitegomoku">Infinite Gomoku</option>
-                <option value="infinitehex">Infinite Hex</option>
-                <option value="infinitetriangle">Infinite Triangle</option>
-              </select>
-            </label>
-            <label>
-              Gravity:
-              <label class="checkbox-container">
-                <input type="checkbox" id="create-gravity">
-                <svg viewBox="0 0 64 64" height="1em" width="1em">
-                  <path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16" pathLength="575.0541381835938" class="path"></path>
-                </svg>
-              </label>
-            </label>
-            <label>
-              Grid Type:
-              <select id="create-grid-type">
-                <option value="square">Square</option>
-                <option value="hex">Hexagon</option>
-                <option value="triangle">Triangle</option>
-              </select>
-            </label>
-            <label>
-              N In A Row:
-              <input type="number" id="create-n-in-a-row" value="5" min="1" step="1" />
-            </label>
-            <label>
-              Team Count:
-              <input type="number" id="create-team-count" value="2" min="1" max="8" step="1" />
-            </label>
-            <label>
-              Team Size:
-              <input type="number" id="create-team-size" value="1" min="1" max="8" step="1" />
-            </label>
-            <label>
-              Turns Per Player:
-              <input type="number" id="create-player-turns" value="1" min="1" max="8" step="1" />
-            </label>
-            <label>
-              Team Order:
-              <select id="create-team-order">
-                <option value="random">Random</option>
-                <option value="join">Join Order</option>
-              </select>
-            </label>
-            <label>
-              Width:
-              <input type="number" id="create-width" value="15" min="1" step="1" />
-            </label>
-            <label>
-              Height:
-              <input type="number" id="create-height" value="15" min="1" step="1" />
-            </label>
-            <label>
-              Expand Length:
-              <input type="number" id="create-expand-length" value="0" min="0" step="1" />
-            </label>
-            <label>
-              Expand Density:
-              <input type="number" id="create-expand-density" value="0" min="0" max="100" step="1" />
-            </label>
-            <label>
-              Density Percentage (instead of count):
-              <label class="checkbox-container">
-                <input type="checkbox" id="create-density-percent">
-                <svg viewBox="0 0 64 64" height="1em" width="1em">
-                  <path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16" pathLength="575.0541381835938" class="path"></path>
-                </svg>
-              </label>
-            </label>
-            <label class="online-only">
-              Online:
-              <label class="checkbox-container">
-                <input type="checkbox" id="create-online">
-                <svg viewBox="0 0 64 64" height="1em" width="1em">
-                  <path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16" pathLength="575.0541381835938" class="path"></path>
-                </svg>
-              </label>
-            </label>
-            <button id="create-button">Create</button>
-          </div>
-          <div id="join-game" class="online-only">
-            <h1>Join game</h1>
-            <label>
-              Room name:
-              <input type="text" id="join-name" value="" />
-            </label>
-            <button id="join-button">Join</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <script type="module" src="/main.ts"></script>
-</body>
-
+        <script type="module" src="/main.ts"></script>
+    </body>
 </html>
