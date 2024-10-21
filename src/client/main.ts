@@ -111,8 +111,8 @@ export function addChatMessage(message: string, username: string) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-export function addPlayerJoinMessage(username: string) {
-    addChatMessage("", `${username} joined the game.`);
+export function addPlayerJoinMessage(username: string, playerCount: number, maxPlayers: number) {
+    addChatMessage("", `${username} joined the game. (${playerCount}/${maxPlayers})`);
 }
 
 function clearChat() {

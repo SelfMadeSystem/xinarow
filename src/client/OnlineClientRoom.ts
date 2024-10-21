@@ -30,7 +30,7 @@ export class OnlineClientRoom extends BaseClientRoom {
 
         onPacket(socket, "players", (fPlayers = (u) => {
             const newPlayers = u.filter((p) => !this.playerNames.includes(p));
-            newPlayers.forEach(addPlayerJoinMessage);
+            newPlayers.forEach(p => addPlayerJoinMessage(p, u.length, this.options.teamCount * this.options.teamSize));
             this.playerNames = u;
         }));
 
