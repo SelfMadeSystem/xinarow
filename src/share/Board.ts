@@ -74,7 +74,7 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
             }
 
             case "hex": {
-                for (;;) {
+                for (let i = false; ; i = !i) {
                     if (this.hasCell(x, y) || !this.withinBounds(x, y)) {
                         return [x, Infinity];
                     }
@@ -88,6 +88,9 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                         return [x, y];
                     }
                     y++;
+                    if (i) {
+                        x--;
+                    }
                 }
             }
 

@@ -112,21 +112,21 @@ export abstract class BaseClientRoom {
             newHighlightedCell = undefined;
         }
 
+        if (newHighlightedCell !== undefined) {
+            const pos = this.board.getCellPos(...newHighlightedCell);
+
+            if (pos === undefined || typeof pos === "string") {
+                newHighlightedCell = undefined;
+            } else {
+                newHighlightedCell = pos;
+            }
+        }
+
         if (
             newHighlightedCell === undefined &&
             this.highlightedCell === undefined
         ) {
             return;
-        }
-
-        if (newHighlightedCell !== undefined) {
-            const pos = this.board.getCellPos(...newHighlightedCell);
-
-            if (pos === undefined || typeof pos === "string") {
-                return;
-            }
-
-            newHighlightedCell = pos;
         }
 
         if (
