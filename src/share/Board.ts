@@ -73,6 +73,24 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
                 break;
             }
 
+            case "hex": {
+                for (;;) {
+                    if (this.hasCell(x, y) || !this.withinBounds(x, y)) {
+                        return [x, Infinity];
+                    }
+
+                    if (
+                        this.hasCell(x, y + 1) ||
+                        !this.withinBounds(x, y + 1) ||
+                        this.hasCell(x - 1, y + 1) ||
+                        !this.withinBounds(x - 1, y + 1)
+                    ) {
+                        return [x, y];
+                    }
+                    y++;
+                }
+            }
+
             default: {
                 for (
                     let i = this.maxY - 1;
