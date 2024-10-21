@@ -40,6 +40,19 @@ export function offCanvasTap(cb: (pos: Vec2) => void) {
     }
 }
 
+const hoverObservers: ((pos: Vec2) => void)[] = [];
+
+export function onCanvasHover(cb: (pos: Vec2) => void) {
+    hoverObservers.push(cb);
+}
+
+export function offCanvasHover(cb: (pos: Vec2) => void) {
+    const index = hoverObservers.indexOf(cb);
+    if (index !== -1) {
+        hoverObservers.splice(index, 1);
+    }
+}
+
 const refreshObservers: ((pos: Vec2) => void)[] = [];
 
 export function onCanvasRefresh(cb: (pos: Vec2) => void) {
@@ -92,6 +105,10 @@ canvas.addEventListener("wheel", (event) => {
     pos = newPos;
 
     refresh();
+});
+
+canvas.addEventListener("mousemove", (event) => {
+    hoverObservers.forEach((cb) => cb([event.clientX, event.clientY]));
 });
 
 canvas.addEventListener("mousedown", (event) => {
@@ -270,6 +287,9 @@ canvas.addEventListener("touchstart", (event) => {
             const diff: Vec2 = [touch[0] - touchPos[0], touch[1] - touchPos[1]];
 
             pos = [oldPos[0] + diff[0], oldPos[1] + diff[1]];
+
+            hoverObservers.forEach((cb) => cb(touch));
+
             refresh();
         }
     };
@@ -348,8 +368,7 @@ function fillShape(points: Vec2[]) {
     ctx.fill();
 }
 
-export function drawSetCell(board: Board) {
-    let cell = board.lastSetCell;
+export function highlightCell(cell: Vec2 | undefined, board: Board) {
     if (cell === undefined) {
         return;
     }

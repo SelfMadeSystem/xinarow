@@ -28,11 +28,23 @@ export class OnlineClientRoom extends BaseClientRoom {
             (fActionTaken = this.actionTaken.bind(this))
         );
 
-        onPacket(socket, "players", (fPlayers = (u) => {
-            const newPlayers = u.filter((p) => !this.playerNames.includes(p));
-            newPlayers.forEach(p => addPlayerJoinMessage(p, u.length, this.options.teamCount * this.options.teamSize));
-            this.playerNames = u;
-        }));
+        onPacket(
+            socket,
+            "players",
+            (fPlayers = (u) => {
+                const newPlayers = u.filter(
+                    (p) => !this.playerNames.includes(p)
+                );
+                newPlayers.forEach((p) =>
+                    addPlayerJoinMessage(
+                        p,
+                        u.length,
+                        this.options.teamCount * this.options.teamSize
+                    )
+                );
+                this.playerNames = u;
+            })
+        );
 
         onPacket(
             socket,
@@ -60,6 +72,7 @@ export class OnlineClientRoom extends BaseClientRoom {
             (fGameStarted = (i) => {
                 console.log("Started!");
                 this.myTurn = i;
+                this.turn = 0;
                 setTurnText(
                     this.turn,
                     this.myTurn,

@@ -123,33 +123,44 @@ export class Board implements Iterable<[number, number, PlayerColor]> {
         return (this.cells[x] && this.cells[x][y]) !== undefined;
     }
 
-    public setCell(x: number, y: number, color: PlayerColor): string | boolean {
-        if (color < 0 || color > PlayerColor.Pink) {
-            return `Color must be between 0 and ${PlayerColor.Pink}`;
-        }
+    public getCellPos(x: number, y: number): string | Vec2 {
         if (this.gravity) {
             [x, y] = this.getGravityPos([x, y]);
 
             if (y === Infinity) {
-                return "Cell out of bounds.";
+                return "Cell out of bounds (gravity)";
             }
 
             if (isNaN(y)) {
-                // For fun, pretend that it passes, but don't actually do anything.
-                return false;
+                return "Infinite y value.";
             }
         }
         if (!this.withinBounds(x, y)) {
-            return "Cell out of bounds.";
+            return "Cell out of bounds (huh)";
         }
         if (this.hasCell(x, y)) {
             return "Cell already set";
         }
-        this._setCell(x, y, color);
-        this.lastSetCell = [x, y];
-        this.tryExpand(x, y);
 
-        return this.testWin(x, y, color);
+        return [x, y];
+    }
+
+    public setCell(x: number, y: number, color: PlayerColor): string | boolean {
+        if (color < 0 || color > PlayerColor.Pink) {
+            return `Color must be between 0 and ${PlayerColor.Pink}`;
+        }
+
+        const pos = this.getCellPos(x, y);
+
+        if (typeof pos === "string") {
+            return pos;
+        }
+
+        this._setCell(...pos, color);
+        this.lastSetCell = pos;
+        this.tryExpand(...pos);
+
+        return this.testWin(...pos, color);
     }
 
     public tryExpand(x: number, y: number) {

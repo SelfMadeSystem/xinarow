@@ -10,14 +10,16 @@ const DBL_INV_SQRT_3 = 2 / Math.sqrt(3);
 export abstract class BaseClientRoom {
     public playerNames: string[] = [];
     public readonly board: Board;
+    public highlightedCell?: Vec2;
     public winningLines: Vec2[][] = [];
-    public turn: number = 0;
+    public turn: number = -1;
     public myTurn: number = -1;
     public ended: boolean = false;
     public closeCb: () => void = () => {};
     public placedThingCb: () => void = () => {};
     public serverPlacedThingCb: (result: string | boolean) => void = () => {};
     private onTapBinding: (v: Vec2) => void;
+    private onHoverBinding: (v: Vec2) => void;
     private onRefreshBinding: (v: Vec2) => void;
     public startTime: number = Date.now();
 
@@ -30,6 +32,9 @@ export abstract class BaseClientRoom {
         requestAnimationFrame(this.draw.bind(this));
 
         CanvasManager.onCanvasTap((this.onTapBinding = this.onTap.bind(this)));
+        CanvasManager.onCanvasHover(
+            (this.onHoverBinding = this.onHover.bind(this))
+        );
         CanvasManager.onCanvasRefresh(
             (this.onRefreshBinding = this.draw.bind(this))
         );
@@ -52,7 +57,7 @@ export abstract class BaseClientRoom {
         }
     }
 
-    onTap([x, y]: Vec2) {
+    getCursorPos([x, y]: Vec2) {
         let point = CanvasManager.fromDrawPoint(x, y);
 
         switch (this.options.gridType) {
@@ -79,12 +84,60 @@ export abstract class BaseClientRoom {
                 }
                 break;
         }
+
+        return point;
+    }
+
+    onTap([x, y]: Vec2) {
+        let point = this.getCursorPos([x, y]);
+
         if (!this.board.withinBounds(point[0], point[1])) {
             return;
         }
         this.placedThingCb();
 
         this.setCell(...point).then(this.serverPlacedThingCb);
+    }
+
+    onHover([x, y]: Vec2) {
+        const point = this.getCursorPos([x, y]);
+
+        let newHighlightedCell: Vec2 | undefined = point;
+
+        if (
+            this.turn === -1 ||
+            (this.myTurn !== -1 && this.myTurn !== this.turn) ||
+            !this.board.withinBounds(point[0], point[1])
+        ) {
+            newHighlightedCell = undefined;
+        }
+
+        if (
+            newHighlightedCell === undefined &&
+            this.highlightedCell === undefined
+        ) {
+            return;
+        }
+
+        if (newHighlightedCell !== undefined) {
+            const pos = this.board.getCellPos(...newHighlightedCell);
+
+            if (pos === undefined || typeof pos === "string") {
+                return;
+            }
+
+            newHighlightedCell = pos;
+        }
+
+        if (
+            newHighlightedCell === undefined ||
+            this.highlightedCell === undefined ||
+            newHighlightedCell[0] !== this.highlightedCell[0] ||
+            newHighlightedCell[1] !== this.highlightedCell[1]
+        ) {
+            this.highlightedCell = newHighlightedCell;
+            this.draw();
+        }
     }
 
     actionTaken(x: number, y: number, color: PlayerColor, turn: number) {
@@ -107,7 +160,8 @@ export abstract class BaseClientRoom {
 
         CanvasManager.ctx.strokeStyle = "white";
 
-        CanvasManager.drawSetCell(this.board);
+        CanvasManager.highlightCell(this.board.lastSetCell, this.board);
+        CanvasManager.highlightCell(this.highlightedCell, this.board);
         CanvasManager.drawGrid(this.board);
         CanvasManager.drawBoard(this.board);
         CanvasManager.drawWinningLines(this.board, this.winningLines);
@@ -116,6 +170,7 @@ export abstract class BaseClientRoom {
     end(reason?: string) {
         this.ended = true;
         CanvasManager.offCanvasTap(this.onTapBinding);
+        CanvasManager.offCanvasHover(this.onHoverBinding);
         CanvasManager.offCanvasRefresh(this.onRefreshBinding);
         this.draw();
         if (reason) {
