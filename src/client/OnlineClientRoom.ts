@@ -1,4 +1,4 @@
-import { PlayerColor } from "../share/PlayerColor";
+import { colorName, PlayerColor } from "../share/PlayerColor";
 import { onPacket, offPacket, RoomOptions } from "../share/Protocol";
 import { action, setCommandHandler } from "./GameHandler";
 import { socket } from "./socket";
@@ -145,10 +145,26 @@ export class OnlineClientRoom extends BaseClientRoom {
     handleCommand(message: string): boolean {
         const [command, ..._args] = message.slice(1).split(" ");
         switch (command) {
-            case "turn": {
+            case "teams": {
+                const teams = this.playerNames.reduce(
+                    (acc, name, i) => {
+                        acc[Math.floor(i / this.options.teamSize)].push(name);
+                        return acc;
+                    },
+                    Array.from(
+                        { length: this.options.teamCount },
+                        (): string[] => []
+                    )
+                );
+
                 addChatMessage(
-                    `It's turn ${this.turn}. Turn order is: red, green, blue, yellow, magenta, cyan, orange, pink.`,
-                    "/turn"
+                    `${teams
+                        .map(
+                            (team, i) =>
+                                `Team ${colorName(i)}: ${team.join(", ")}`
+                        )
+                        .join("\n")}`,
+                    "/teams"
                 );
                 return true;
             }
