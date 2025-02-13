@@ -38,6 +38,9 @@ export default defineConfig({
               }
             : {}),
     },
+    preview: {
+        allowedHosts: true, // it's not a critical app, so we can allow all hosts
+    },
     build: {
         outDir: "../../dist/",
 
