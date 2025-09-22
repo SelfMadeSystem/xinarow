@@ -47,6 +47,10 @@ export abstract class BaseClientRoom {
         requestAnimationFrame(this.setTimeText.bind(this));
     }
 
+    isMyTurn(): boolean {
+        return Math.floor(this.turn / this.options.playerTurns) === this.myTurn;
+    }
+
     setTimeText() {
         const time = Math.floor((Date.now() - this.startTime) / 1000);
         const minutes = Math.floor(time / 60);
@@ -106,7 +110,7 @@ export abstract class BaseClientRoom {
 
         if (
             this.turn === -1 ||
-            (this.myTurn !== -1 && this.myTurn !== this.turn) ||
+            (this.myTurn !== -1 && !this.isMyTurn()) ||
             !this.board.withinBounds(point[0], point[1])
         ) {
             newHighlightedCell = undefined;

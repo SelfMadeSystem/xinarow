@@ -121,7 +121,7 @@ export class OnlineClientRoom extends BaseClientRoom {
         const [command, ..._args] = message.slice(1).split(" ");
         switch (command) {
             case "metalpipe": {
-                if (this.turn === this.myTurn) {
+                if (this.isMyTurn()) {
                     if (username === this.playerNames[this.myTurn]) {
                         addChatMessage(
                             "You can't use /metalpipe on your turn!",
